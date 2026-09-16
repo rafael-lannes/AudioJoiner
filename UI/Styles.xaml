@@ -12,10 +12,11 @@
     <Color x:Key="AccentIndigoColor">#6366F1</Color>
     <Color x:Key="AccentEmeraldColor">#10B981</Color>
     <Color x:Key="AccentCoralColor">#EF4444</Color>
+    <Color x:Key="AccentAmberColor">#F59E0B</Color>
 
     <Color x:Key="TextPrimaryColor">#F8FAFC</Color>
-    <Color x:Key="TextSecondaryColor">#94A3B8</Color>
-    <Color x:Key="TextMutedColor">#64748B</Color>
+    <Color x:Key="TextSecondaryColor">#CBD5E1</Color>
+    <Color x:Key="TextMutedColor">#94A3B8</Color>
 
     <SolidColorBrush x:Key="BgDarkBrush" Color="{StaticResource BgDarkColor}" />
     <SolidColorBrush x:Key="BgCardBrush" Color="{StaticResource BgCardColor}" />
@@ -27,6 +28,7 @@
     <SolidColorBrush x:Key="AccentIndigoBrush" Color="{StaticResource AccentIndigoColor}" />
     <SolidColorBrush x:Key="AccentEmeraldBrush" Color="{StaticResource AccentEmeraldColor}" />
     <SolidColorBrush x:Key="AccentCoralBrush" Color="{StaticResource AccentCoralColor}" />
+    <SolidColorBrush x:Key="AccentAmberBrush" Color="{StaticResource AccentAmberColor}" />
 
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />
@@ -48,10 +50,26 @@
         <GradientStop Color="#DC2626" Offset="1" />
     </LinearGradientBrush>
 
+    <!-- Modern High-Contrast Focus Visual for Keyboard A11y -->
+    <Style x:Key="ModernFocusVisual">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border BorderBrush="{StaticResource AccentSkyBrush}" BorderThickness="2" CornerRadius="6" Margin="-2">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="6" Color="#0EA5E9" Opacity="0.7" ShadowDepth="0" />
+                        </Border.Effect>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Modern Toggle Switch Style -->
     <Style x:Key="ModernToggleSwitch" TargetType="{x:Type CheckBox}">
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
         <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ModernFocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">
@@ -64,7 +82,7 @@
                                     BorderBrush="#3D445C" />
                             <Ellipse x:Name="Thumb"
                                      Width="18" Height="18"
-                                     Fill="#94A3B8"
+                                     Fill="#CBD5E1"
                                      HorizontalAlignment="Left"
                                      Margin="3,0,0,0">
                                 <Ellipse.Effect>
@@ -98,10 +116,11 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{StaticResource AccentSkyBrush}" />
         <Setter Property="Height" Value="24" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ModernFocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Slider}">
-                    <Grid VerticalAlignment="Center">
+                    <Grid VerticalAlignment="Center" x:Name="SliderRoot">
                         <Border Height="6" CornerRadius="3" Background="#2A2F40">
                             <Grid>
                                 <Border x:Name="PART_SelectionRange" Height="6" CornerRadius="3" Background="{StaticResource PrimaryGradientBrush}" HorizontalAlignment="Left" />
@@ -144,6 +163,12 @@
                             </Track.IncreaseRepeatButton>
                         </Track>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="SliderRoot" Property="Opacity" Value="0.4" />
+                            <Setter Property="Cursor" Value="No" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -156,12 +181,13 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{StaticResource AccentSkyBrush}" />
         <Setter Property="Width" Value="24" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ModernFocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Slider}">
-                    <Grid HorizontalAlignment="Center">
+                    <Grid HorizontalAlignment="Center" x:Name="VerticalSliderRoot">
                         <Border Width="6" CornerRadius="3" Background="#2A2F40" HorizontalAlignment="Center" />
-                        <!-- 0dB Middle Mark -->
+                        <!-- 0dB Center Reference Mark -->
                         <Border Width="12" Height="1.5" Background="#475569" VerticalAlignment="Center" HorizontalAlignment="Center" />
                         <Track x:Name="PART_Track">
                             <Track.DecreaseRepeatButton>
@@ -200,6 +226,12 @@
                             </Track.IncreaseRepeatButton>
                         </Track>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="VerticalSliderRoot" Property="Opacity" Value="0.35" />
+                            <Setter Property="Cursor" Value="No" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -215,6 +247,7 @@
         <Setter Property="Padding" Value="20,0" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ModernFocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
@@ -254,6 +287,7 @@
         <Setter Property="Padding" Value="20,0" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ModernFocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
@@ -273,6 +307,10 @@
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="border" Property="Opacity" Value="0.75" />
                         </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Opacity" Value="0.4" />
+                            <Setter Property="Cursor" Value="No" />
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -286,6 +324,7 @@
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="6" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ModernFocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
@@ -299,6 +338,44 @@
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="border" Property="Background" Value="#3D445C" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Opacity" Value="0.4" />
+                            <Setter Property="Cursor" Value="No" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Batch Action Text Button Style -->
+    <Style x:Key="BatchActionButton" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource AccentSkyBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ModernFocusVisual}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#2A2F40" />
+                            <Setter Property="Foreground" Value="#FFFFFF" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#3D445C" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Opacity" Value="0.4" />
+                            <Setter Property="Cursor" Value="No" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -386,6 +463,7 @@
         <Setter Property="Height" Value="36" />
         <Setter Property="Padding" Value="10,6" />
         <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ModernFocusVisual}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ComboBox}">

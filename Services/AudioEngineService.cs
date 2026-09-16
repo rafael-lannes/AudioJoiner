@@ -26,6 +26,7 @@ public class AudioEngineService : IAudioEngineService
     private bool _isDisposed;
 
     private bool _isEqualizerEnabled = true;
+    private bool _isEqualizerExpanded = false;
     private EqualizerPreset? _selectedEqualizerPreset;
 
     public ObservableCollection<AudioDeviceInfo> Devices { get; } = new();
@@ -93,6 +94,20 @@ public class AudioEngineService : IAudioEngineService
         }
     }
 
+    public bool IsEqualizerExpanded
+    {
+        get => _isEqualizerExpanded;
+        set
+        {
+            if (_isEqualizerExpanded != value)
+            {
+                _isEqualizerExpanded = value;
+                SaveDeviceSettings();
+                StateChanged?.Invoke();
+            }
+        }
+    }
+
     public EqualizerPreset? SelectedEqualizerPreset
     {
         get => _selectedEqualizerPreset;
@@ -141,6 +156,7 @@ public class AudioEngineService : IAudioEngineService
 
         var eqSettings = _settingsService.CurrentSettings.Equalizer ?? new EqualizerSettings();
         _isEqualizerEnabled = eqSettings.IsEnabled;
+        _isEqualizerExpanded = eqSettings.IsExpanded;
 
         float[] savedGains = eqSettings.BandGains ?? new float[10];
 
@@ -439,6 +455,42 @@ public class AudioEngineService : IAudioEngineService
         SaveDeviceSettings();
     }
 
+    public void EnableAllDevices()
+    {
+        bool changed = false;
+        foreach (var dev in Devices)
+        {
+            if (!dev.IsSource && dev.IsAvailable && !dev.IsMirrorEnabled)
+            {
+                dev.IsMirrorEnabled = true;
+                changed = true;
+            }
+        }
+        if (changed)
+        {
+            SyncActiveWorkers();
+            SaveDeviceSettings();
+        }
+    }
+
+    public void DisableAllDevices()
+    {
+        bool changed = false;
+        foreach (var dev in Devices)
+        {
+            if (!dev.IsSource && dev.IsMirrorEnabled)
+            {
+                dev.IsMirrorEnabled = false;
+                changed = true;
+            }
+        }
+        if (changed)
+        {
+            SyncActiveWorkers();
+            SaveDeviceSettings();
+        }
+    }
+
     public void SetDeviceVolume(string deviceId, float volume)
     {
         var device = Devices.FirstOrDefault(d => d.Id == deviceId);
@@ -704,6 +756,7 @@ public class AudioEngineService : IAudioEngineService
         _settingsService.CurrentSettings.Equalizer = new EqualizerSettings
         {
             IsEnabled = _isEqualizerEnabled,
+            IsExpanded = _isEqualizerExpanded,
             SelectedPreset = _selectedEqualizerPreset?.Name ?? "Flat (Padrão)",
             BandGains = EqualizerBands.Select(b => b.GainDb).ToArray()
         };

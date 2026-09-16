@@ -109,7 +109,7 @@
             <!-- 5. Close Button -->
             <Button Grid.Row="5" Content="Fechar" Style="{StaticResource PrimaryButton}"
                     Height="38" Padding="24,0" HorizontalAlignment="Center"
-                    Click="BtnClose_Click" />
+                    Click="BtnClose_Click" IsCancel="True" IsDefault="True" />
         </Grid>
     </Border>
 </Window>

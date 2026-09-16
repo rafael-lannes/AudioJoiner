@@ -15,6 +15,7 @@ public interface IAudioEngineService : IDisposable
     ObservableCollection<EqualizerBand> EqualizerBands { get; }
     List<EqualizerPreset> EqualizerPresets { get; }
     bool IsEqualizerEnabled { get; set; }
+    bool IsEqualizerExpanded { get; set; }
     EqualizerPreset? SelectedEqualizerPreset { get; set; }
 
     event Action? StateChanged;
@@ -26,6 +27,8 @@ public interface IAudioEngineService : IDisposable
     void StopMirroring();
     void SetDeviceMirrorState(string deviceId, bool isEnabled);
     void SetDeviceVolume(string deviceId, float volume);
+    void EnableAllDevices();
+    void DisableAllDevices();
 
     void SetEqualizerBandGain(int bandIndex, float gainDb);
     void ApplyEqualizerPreset(EqualizerPreset preset);

@@ -6,13 +6,14 @@
         xmlns:converters="clr-namespace:AudioJoiner.UI.Converters"
         mc:Ignorable="d"
         Title="AudioJoiner - Multi-Output Audio Cloner"
-        Height="860" Width="680"
-        MinHeight="720" MinWidth="580"
+        Height="780" Width="680"
+        MinHeight="600" MinWidth="580"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        FontFamily="Segoe UI Variable Display, Segoe UI, sans-serif">
+        FontFamily="Segoe UI Variable Display, Segoe UI, sans-serif"
+        KeyDown="Window_KeyDown">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -35,25 +36,26 @@
             BorderThickness="1"
             CornerRadius="14">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="24" Color="#000000" Opacity="0.5" ShadowDepth="6" />
+            <DropShadowEffect BlurRadius="24" Color="#000000" Opacity="0.55" ShadowDepth="6" />
         </Border.Effect>
 
         <Grid Margin="18">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" /> <!-- Custom Title Bar -->
-                <RowDefinition Height="Auto" /> <!-- Master Control Card -->
-                <RowDefinition Height="Auto" /> <!-- Equalizer Card -->
-                <RowDefinition Height="*" />    <!-- Destination Devices List -->
-                <RowDefinition Height="Auto" /> <!-- Quick Settings Card -->
-                <RowDefinition Height="Auto" /> <!-- Footer -->
+                <RowDefinition Height="Auto" /> <!-- 0: Custom Title Bar -->
+                <RowDefinition Height="Auto" /> <!-- 1: Inline Alert Banner -->
+                <RowDefinition Height="Auto" /> <!-- 2: Master Control Card -->
+                <RowDefinition Height="Auto" /> <!-- 3: Equalizer Card (Collapsible) -->
+                <RowDefinition Height="*" />    <!-- 4: Destination Devices List -->
+                <RowDefinition Height="Auto" /> <!-- 5: Quick Settings Card -->
+                <RowDefinition Height="Auto" /> <!-- 6: Footer -->
             </Grid.RowDefinitions>
 
-            <!-- 1. CUSTOM TITLE BAR -->
-            <Grid Grid.Row="0" Margin="0,0,0,14" MouseLeftButtonDown="TitleBar_MouseDown" Background="Transparent">
+            <!-- 0. CUSTOM TITLE BAR -->
+            <Grid Grid.Row="0" Margin="0,0,0,12" MouseLeftButtonDown="TitleBar_MouseDown" Background="Transparent">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Logo & App Title -->
@@ -74,9 +76,9 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Status Pill Badge -->
+                <!-- Status Pill Badge (Centered) -->
                 <Border Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        CornerRadius="12" Padding="10,4" Margin="10,0"
+                        CornerRadius="12" Padding="12,4" Margin="10,0"
                         Background="#1A1D27" BorderBrush="{StaticResource BorderDarkBrush}" BorderThickness="1">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Ellipse x:Name="StatusDot" Width="8" Height="8" Margin="0,0,6,0" Fill="{StaticResource TextMutedBrush}" />
@@ -84,27 +86,44 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Window Control Buttons -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Style="{StaticResource SubtleIconButton}" ToolTip="Sobre o AudioJoiner / Desenvolvedor" Click="BtnAbout_Click" Margin="0,0,4,0">
+                <!-- Window Control Buttons (Preserved exact icons and behaviors) -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource SubtleIconButton}" ToolTip="Sobre o AudioJoiner / Desenvolvedor" Click="BtnAbout_Click" Margin="0,0,4,0" AutomationProperties.Name="Sobre o AudioJoiner">
                         <TextBlock Text="ℹ" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" Width="16" TextAlignment="Center" />
                     </Button>
-                    <Button Style="{StaticResource SubtleIconButton}" ToolTip="Minimizar para a Barra de Tarefas" Click="BtnMinimize_Click">
+                    <Button Style="{StaticResource SubtleIconButton}" ToolTip="Minimizar para a Barra de Tarefas" Click="BtnMinimize_Click" AutomationProperties.Name="Minimizar">
                         <TextBlock Text="—" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" Width="16" TextAlignment="Center" />
                     </Button>
-                    <Button Style="{StaticResource SubtleIconButton}" ToolTip="Minimizar para a Bandeja do Sistema" Click="BtnMinimizeToTray_Click" Margin="4,0,0,0">
+                    <Button Style="{StaticResource SubtleIconButton}" ToolTip="Minimizar para a Bandeja do Sistema" Click="BtnMinimizeToTray_Click" Margin="4,0,0,0" AutomationProperties.Name="Minimizar para a Bandeja">
                         <Path Fill="{StaticResource TextSecondaryBrush}" Width="14" Height="14" Stretch="Uniform"
                               Data="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
                     </Button>
-                    <Button Style="{StaticResource SubtleIconButton}" ToolTip="Fechar / Ocultar" Click="BtnClose_Click" Margin="4,0,0,0">
+                    <Button Style="{StaticResource SubtleIconButton}" ToolTip="Fechar / Ocultar para a Bandeja" Click="BtnClose_Click" Margin="4,0,0,0" AutomationProperties.Name="Fechar">
                         <TextBlock Text="✕" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" Width="16" TextAlignment="Center" />
                     </Button>
                 </StackPanel>
             </Grid>
 
+            <!-- 1. INLINE ALERT / NOTIFICATION BANNER -->
+            <Border Grid.Row="1" x:Name="InlineAlertBar" Background="#231718" BorderBrush="{StaticResource AccentCoralBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,10" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="⚠️" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" x:Name="TxtInlineAlert" Text="Aviso da aplicação" FontSize="11.5" Foreground="#FCA5A5" VerticalAlignment="Center" TextWrapping="Wrap" />
+                    <Button Grid.Column="2" Style="{StaticResource SubtleIconButton}" Padding="4,2" VerticalAlignment="Center" Click="BtnDismissAlert_Click" ToolTip="Fechar alerta">
+                        <TextBlock Text="✕" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                    </Button>
+                </Grid>
+            </Border>
+
             <!-- 2. MASTER CONTROL CARD -->
-            <Border Grid.Row="1" Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderDarkBrush}"
-                    BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,12">
+            <Border Grid.Row="2" Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderDarkBrush}"
+                    BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,10">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -117,12 +136,13 @@
                             <TextBlock Text="DISPOSITIVO DE ORIGEM (CAPTURA DO SISTEMA)" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6" />
                             <ComboBox x:Name="CmbSourceDevice" Style="{StaticResource ModernComboBox}"
                                       SelectionChanged="CmbSourceDevice_SelectionChanged"
-                                      DisplayMemberPath="Name" />
+                                      DisplayMemberPath="Name"
+                                      AutomationProperties.Name="Dispositivo de Áudio de Origem" />
                         </StackPanel>
                     </Grid>
 
                     <!-- Middle row: Master Action Button & Master Volume -->
-                    <Grid Grid.Row="1" Margin="0,4,0,2">
+                    <Grid Grid.Row="1" Margin="0,2,0,2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -132,7 +152,9 @@
                         <Button x:Name="BtnToggleMirror" Grid.Column="0"
                                 Style="{StaticResource PrimaryButton}"
                                 Height="44" Padding="22,0"
-                                Click="BtnToggleMirror_Click">
+                                Click="BtnToggleMirror_Click"
+                                ToolTip="Atalho: Tecla Espaço"
+                                AutomationProperties.Name="Iniciar ou Parar Espelhamento">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Path x:Name="IconToggleBtn" Fill="#FFFFFF" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"
                                       Data="M8 5v14l11-7z" />
@@ -155,7 +177,10 @@
 
                             <Slider Grid.Row="1" x:Name="SliderMasterVolume" Style="{StaticResource ModernSlider}"
                                     Minimum="0" Maximum="1.5" SmallChange="0.05" LargeChange="0.1" Value="1.0"
-                                    ValueChanged="SliderMasterVolume_ValueChanged" />
+                                    ValueChanged="SliderMasterVolume_ValueChanged"
+                                    MouseDoubleClick="SliderMasterVolume_MouseDoubleClick"
+                                    ToolTip="Duplo clique para restaurar 100%"
+                                    AutomationProperties.Name="Controle Deslizante de Volume Master" />
 
                             <Grid Grid.Row="2" Height="4" Margin="0,4,0,0">
                                 <Border Background="#2A2F40" CornerRadius="2" />
@@ -167,17 +192,17 @@
                 </Grid>
             </Border>
 
-            <!-- 3. EQUALIZER CARD (DSP 10 BANDAS) -->
-            <Border Grid.Row="2" Background="#161922" BorderBrush="{StaticResource BorderDarkBrush}"
-                    BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,12">
+            <!-- 3. EQUALIZER CARD (PROGRESSIVE DISCLOSURE ACCORDION) -->
+            <Border Grid.Row="3" Background="#161922" BorderBrush="{StaticResource BorderDarkBrush}"
+                    BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,10">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" /> <!-- Header & Presets -->
-                        <RowDefinition Height="Auto" /> <!-- 10 Sliders -->
+                        <RowDefinition Height="Auto" /> <!-- 10 Sliders (Collapsible) -->
                     </Grid.RowDefinitions>
 
-                    <!-- Header Row: Title, Preset Dropdown, Reset, Enable Switch -->
-                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <!-- Header Row: Title, Preset Dropdown, Reset, Enable Switch & Expand Button -->
+                    <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -196,69 +221,87 @@
                         <!-- Presets Selector & Reset Button -->
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <TextBlock Text="Preset:" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <ComboBox x:Name="CmbEqPreset" Style="{StaticResource ModernComboBox}" Height="28" Width="150" FontSize="11"
-                                      DisplayMemberPath="Name" SelectionChanged="CmbEqPreset_SelectionChanged" />
+                            <ComboBox x:Name="CmbEqPreset" Style="{StaticResource ModernComboBox}" Height="28" Width="145" FontSize="11"
+                                      DisplayMemberPath="Name" SelectionChanged="CmbEqPreset_SelectionChanged"
+                                      AutomationProperties.Name="Preset de Equalização" />
                             <Button Style="{StaticResource SubtleIconButton}" Height="28" Padding="8,0" Margin="6,0,0,0"
-                                    Click="BtnResetEq_Click" ToolTip="Resetar bandas para 0 dB (Flat)">
+                                    Click="BtnResetEq_Click" ToolTip="Resetar bandas para 0 dB (Flat)"
+                                    AutomationProperties.Name="Resetar Equalizador para Flat">
                                 <TextBlock Text="Resetar" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" />
                             </Button>
                         </StackPanel>
 
-                        <!-- EQ Active Toggle Switch -->
+                        <!-- Controls: Enable Toggle Switch & Chevron Expand Button -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="Ativar" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,6,0" />
                             <CheckBox x:Name="ChkEqEnable" Style="{StaticResource ModernToggleSwitch}"
                                       IsChecked="{Binding IsEqualizerEnabled, Mode=TwoWay}"
                                       Checked="ChkEqEnable_Changed" Unchecked="ChkEqEnable_Changed"
-                                      ToolTip="Ativar/Desativar equalizador de áudio em tempo real" />
+                                      ToolTip="Ativar ou desativar o equalizador DSP em tempo real"
+                                      AutomationProperties.Name="Ativar Equalizador DSP" />
+
+                            <!-- Expand / Collapse Chevron Button -->
+                            <Button Style="{StaticResource SubtleIconButton}" Padding="6,2" Margin="6,0,0,0"
+                                    Click="BtnToggleEqExpand_Click"
+                                    ToolTip="Expandir / Recolher Sliders do Equalizador (Ctrl+E)"
+                                    AutomationProperties.Name="Expandir ou Recolher Equalizador">
+                                <TextBlock x:Name="TxtEqExpandChevron" Text="⌵" FontSize="13" FontWeight="Bold" Foreground="{StaticResource AccentSkyBrush}" />
+                            </Button>
                         </StackPanel>
                     </Grid>
 
-                    <!-- 10 Vertical Sliders Grid -->
-                    <ItemsControl Grid.Row="1" x:Name="ListEqBands" ItemsSource="{Binding EqualizerBands}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Rows="1" Columns="10" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="2,0">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" /> <!-- dB Value -->
-                                        <RowDefinition Height="100" />  <!-- Vertical Slider -->
-                                        <RowDefinition Height="Auto" /> <!-- Frequency Label -->
-                                    </Grid.RowDefinitions>
+                    <!-- 10 Vertical Sliders Grid (Progressive Disclosure) -->
+                    <Grid Grid.Row="1" x:Name="EqBandsContainer" Margin="0,12,0,4"
+                          Visibility="{Binding IsEqualizerExpanded, Converter={StaticResource BoolToVis}}">
+                        <ItemsControl x:Name="ListEqBands" ItemsSource="{Binding EqualizerBands}"
+                                      KeyboardNavigation.TabNavigation="Once">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="1" Columns="10" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="2,0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" /> <!-- dB Value -->
+                                            <RowDefinition Height="95" />   <!-- Vertical Slider -->
+                                            <RowDefinition Height="Auto" /> <!-- Frequency Label -->
+                                        </Grid.RowDefinitions>
 
-                                    <!-- dB Gain Value Text -->
-                                    <TextBlock Grid.Row="0" Text="{Binding GainDisplay}" FontSize="9.5" FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                        <!-- dB Gain Value Text -->
+                                        <TextBlock Grid.Row="0" Text="{Binding GainDisplay}" FontSize="9.5" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,0,0,4" />
 
-                                    <!-- Vertical Slider -->
-                                    <Slider Grid.Row="1" Style="{StaticResource ModernVerticalSlider}"
-                                            Minimum="-12.0" Maximum="12.0" SmallChange="0.5" LargeChange="2.0"
-                                            Value="{Binding GainDb, Mode=TwoWay, Converter={StaticResource FloatToDouble}}"
-                                            ValueChanged="EqSlider_ValueChanged"
-                                            Tag="{Binding Index}" />
+                                        <!-- Vertical Slider with Double-Click Reset & Focus Visual -->
+                                        <Slider Grid.Row="1" Style="{StaticResource ModernVerticalSlider}"
+                                                Minimum="-12.0" Maximum="12.0" SmallChange="0.5" LargeChange="2.0"
+                                                Value="{Binding GainDb, Mode=TwoWay, Converter={StaticResource FloatToDouble}}"
+                                                ValueChanged="EqSlider_ValueChanged"
+                                                MouseDoubleClick="EqSlider_MouseDoubleClick"
+                                                Tag="{Binding Index}"
+                                                ToolTip="Duplo clique para 0 dB"
+                                                AutomationProperties.Name="{Binding Label, StringFormat='Banda {0}'}" />
 
-                                    <!-- Frequency Label -->
-                                    <TextBlock Grid.Row="2" Text="{Binding Label}" FontSize="10" FontWeight="Bold"
-                                               Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,4,0,0" />
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                                        <!-- Frequency Label -->
+                                        <TextBlock Grid.Row="2" Text="{Binding Label}" FontSize="10" FontWeight="Bold"
+                                                   Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
                 </Grid>
             </Border>
 
             <!-- 4. DESTINATION DEVICES (OUTPUTS) -->
-            <Grid Grid.Row="3" Margin="0,0,0,12">
+            <Grid Grid.Row="4" Margin="0,0,0,10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <!-- Section Header with Refresh -->
+                <!-- Section Header with Batch Actions & Refresh -->
                 <Grid Grid.Row="0" Margin="0,0,0,8">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="DISPOSITIVOS DE DESTINO (ESPELHAMENTO)" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" />
@@ -267,107 +310,138 @@
                         </Border>
                     </StackPanel>
 
-                    <!-- Button Refresh -->
-                    <Button Style="{StaticResource SubtleIconButton}" HorizontalAlignment="Right" ToolTip="Atualizar Dispositivos" Click="BtnRefreshDevices_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Fill="{StaticResource TextSecondaryBrush}" Width="12" Height="12" Stretch="Uniform" Margin="0,0,4,0"
-                                  Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
-                            <TextBlock Text="Atualizar" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
-                        </StackPanel>
-                    </Button>
+                    <!-- Right Header Actions: Batch Toggle & Refresh -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Style="{StaticResource BatchActionButton}" Content="Ativar Todos" Click="BtnEnableAll_Click" ToolTip="Habilitar todas as saídas" AutomationProperties.Name="Ativar Todas as Saídas" />
+                        <TextBlock Text="|" Foreground="#3D445C" VerticalAlignment="Center" Margin="4,0" />
+                        <Button Style="{StaticResource BatchActionButton}" Content="Desativar Todos" Click="BtnDisableAll_Click" Margin="0,0,8,0" ToolTip="Desabilitar todas as saídas" AutomationProperties.Name="Desativar Todas as Saídas" />
+
+                        <!-- Button Refresh -->
+                        <Button Style="{StaticResource SubtleIconButton}" ToolTip="Atualizar Dispositivos (F5 / Ctrl+R)" Click="BtnRefreshDevices_Click" AutomationProperties.Name="Atualizar Dispositivos">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Fill="{StaticResource TextSecondaryBrush}" Width="12" Height="12" Stretch="Uniform" Margin="0,0,4,0"
+                                      Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                                <TextBlock Text="Atualizar" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </Grid>
 
-                <!-- Scrollable Output List -->
+                <!-- Scrollable Output List & Empty State -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl x:Name="ListOutputDevices">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="{StaticResource BgCardBrush}"
-                                        BorderBrush="{StaticResource BorderDarkBrush}"
-                                        BorderThickness="1" CornerRadius="10"
-                                        Padding="14,12" Margin="0,0,0,8">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <!-- Device Icon Badge -->
-                                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Background="#2A2F40" Margin="0,0,12,0" VerticalAlignment="Center">
-                                            <Path Fill="{StaticResource TextSecondaryBrush}" Width="18" Height="18" Stretch="Uniform"
-                                                  Data="{Binding IconType, Converter={StaticResource DeviceIcon}}" />
-                                        </Border>
-
-                                        <!-- Device Info & Realtime VU Meter -->
-                                        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-
-                                            <StackPanel Grid.Row="0" Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"
-                                                           TextTrimming="CharacterEllipsis" MaxWidth="250" />
-                                                <Border Visibility="{Binding IsSource, Converter={StaticResource BoolToVis}}"
-                                                        Background="#2A2F40" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                                    <TextBlock Text="ORIGEM" FontSize="9" FontWeight="Bold" Foreground="{StaticResource AccentSkyBrush}" />
-                                                </Border>
-                                                <Border Visibility="{Binding IsDefault, Converter={StaticResource BoolToVis}}"
-                                                        Background="#2A2F40" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                                    <TextBlock Text="PADRÃO" FontSize="9" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" />
-                                                </Border>
-                                            </StackPanel>
-
-                                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,2,0,4">
-                                                <TextBlock Text="{Binding FormatDescription}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
-                                                <TextBlock Text=" • " FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
-                                                <TextBlock Text="{Binding StatusText}" FontSize="11" FontWeight="SemiBold"
-                                                           Foreground="{Binding StatusText, Converter={StaticResource StatusBrush}}" />
-                                            </StackPanel>
-
-                                            <Grid Grid.Row="2" Height="3" Visibility="{Binding CanBeMirrored, Converter={StaticResource BoolToVis}}">
-                                                <Border Background="#2A2F40" CornerRadius="1.5" />
-                                                <Border Height="3" CornerRadius="1.5" HorizontalAlignment="Left"
-                                                        Background="{StaticResource PrimaryGradientBrush}"
-                                                        Width="{Binding PeakLevel, Converter={StaticResource PeakToWidth}, ConverterParameter='200'}" />
-                                            </Grid>
-                                        </Grid>
-
-                                        <!-- Controls: Volume Slider + Toggle Switch -->
-                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
-                                                    Visibility="{Binding CanBeMirrored, Converter={StaticResource BoolToVis}}">
-                                            <StackPanel Orientation="Vertical" Width="100" Margin="0,0,14,0" VerticalAlignment="Center">
-                                                <Grid Margin="0,0,0,1">
-                                                    <TextBlock Text="Ganho" FontSize="10" Foreground="{StaticResource TextMutedBrush}" />
-                                                    <TextBlock Text="{Binding Volume, Converter={StaticResource VolToPercent}}"
-                                                               FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Right" />
-                                                </Grid>
-                                                <Slider Style="{StaticResource ModernSlider}"
-                                                        Minimum="0" Maximum="1.5" SmallChange="0.05" LargeChange="0.1"
-                                                        Value="{Binding Volume, Mode=TwoWay, Converter={StaticResource FloatToDouble}}"
-                                                        ValueChanged="DeviceVolumeSlider_ValueChanged"
-                                                        Tag="{Binding Id}" />
-                                            </StackPanel>
-
-                                            <CheckBox Style="{StaticResource ModernToggleSwitch}"
-                                                      IsChecked="{Binding IsMirrorEnabled, Mode=TwoWay}"
-                                                      Checked="DeviceToggle_Changed"
-                                                      Unchecked="DeviceToggle_Changed"
-                                                      Tag="{Binding Id}"
-                                                      ToolTip="Habilitar/Desabilitar espelhamento para este dispositivo" />
-                                        </StackPanel>
-                                    </Grid>
+                    <StackPanel>
+                        <!-- Empty State View (Shown when no outputs available) -->
+                        <Border x:Name="EmptyStateCard" Visibility="Collapsed" Background="{StaticResource BgCardBrush}"
+                                BorderBrush="{StaticResource BorderDarkBrush}" BorderThickness="1" CornerRadius="10"
+                                Padding="28,24" Margin="0,4,0,8" HorizontalAlignment="Stretch">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Border Width="44" Height="44" CornerRadius="12" Background="#2A2F40" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                    <Path Fill="{StaticResource TextMutedBrush}" Width="20" Height="20" Stretch="Uniform"
+                                          Data="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
                                 </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                                <TextBlock Text="Nenhum dispositivo de destino encontrado" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock Text="Conecte um fone de ouvido, monitor HDMI ou caixa de som e clique em Atualizar." FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,4,0,12" TextAlignment="Center" />
+                                <Button Style="{StaticResource PrimaryButton}" Height="34" Padding="18,0" HorizontalAlignment="Center" Click="BtnRefreshDevices_Click">
+                                    <TextBlock Text="Atualizar Dispositivos" FontSize="12" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Destination Devices Items -->
+                        <ItemsControl x:Name="ListOutputDevices">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{StaticResource BgCardBrush}"
+                                            BorderBrush="{StaticResource BorderDarkBrush}"
+                                            BorderThickness="1" CornerRadius="10"
+                                            Padding="14,12" Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Device Icon Badge -->
+                                            <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Background="#2A2F40" Margin="0,0,12,0" VerticalAlignment="Center">
+                                                <Path Fill="{StaticResource TextSecondaryBrush}" Width="18" Height="18" Stretch="Uniform"
+                                                      Data="{Binding IconType, Converter={StaticResource DeviceIcon}}" />
+                                            </Border>
+
+                                            <!-- Device Info & Realtime VU Meter -->
+                                            <Grid Grid.Column="1" VerticalAlignment="Center" Margin="0,0,14,0">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <Border Visibility="{Binding IsSource, Converter={StaticResource BoolToVis}}"
+                                                            Background="#2A2F40" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                        <TextBlock Text="ORIGEM" FontSize="9" FontWeight="Bold" Foreground="{StaticResource AccentSkyBrush}" />
+                                                    </Border>
+                                                    <Border Visibility="{Binding IsDefault, Converter={StaticResource BoolToVis}}"
+                                                            Background="#2A2F40" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                        <TextBlock Text="PADRÃO" FontSize="9" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" />
+                                                    </Border>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,2,0,4">
+                                                    <TextBlock Text="{Binding FormatDescription}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                                    <TextBlock Text=" • " FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                                    <TextBlock Text="{Binding StatusText}" FontSize="11" FontWeight="SemiBold"
+                                                               Foreground="{Binding StatusText, Converter={StaticResource StatusBrush}}" />
+                                                </StackPanel>
+
+                                                <Grid Grid.Row="2" Height="3" Visibility="{Binding CanBeMirrored, Converter={StaticResource BoolToVis}}">
+                                                    <Border Background="#2A2F40" CornerRadius="1.5" />
+                                                    <Border Height="3" CornerRadius="1.5" HorizontalAlignment="Left"
+                                                            Background="{StaticResource PrimaryGradientBrush}"
+                                                            Width="{Binding PeakLevel, Converter={StaticResource PeakToWidth}, ConverterParameter='200'}" />
+                                                </Grid>
+                                            </Grid>
+
+                                            <!-- Controls: Volume Slider + Toggle Switch -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
+                                                        Visibility="{Binding CanBeMirrored, Converter={StaticResource BoolToVis}}">
+                                                <StackPanel Orientation="Vertical" Width="100" Margin="0,0,14,0" VerticalAlignment="Center">
+                                                    <Grid Margin="0,0,0,1">
+                                                        <TextBlock Text="Ganho" FontSize="10" Foreground="{StaticResource TextMutedBrush}" />
+                                                        <TextBlock Text="{Binding Volume, Converter={StaticResource VolToPercent}}"
+                                                                   FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Right" />
+                                                    </Grid>
+                                                    <Slider Style="{StaticResource ModernSlider}"
+                                                            Minimum="0" Maximum="1.5" SmallChange="0.05" LargeChange="0.1"
+                                                            Value="{Binding Volume, Mode=TwoWay, Converter={StaticResource FloatToDouble}}"
+                                                            ValueChanged="DeviceVolumeSlider_ValueChanged"
+                                                            MouseDoubleClick="DeviceVolumeSlider_MouseDoubleClick"
+                                                            Tag="{Binding Id}"
+                                                            ToolTip="Duplo clique para restaurar 100%"
+                                                            AutomationProperties.Name="{Binding Name, StringFormat='Volume de {0}'}" />
+                                                </StackPanel>
+
+                                                <CheckBox Style="{StaticResource ModernToggleSwitch}"
+                                                          IsChecked="{Binding IsMirrorEnabled, Mode=TwoWay}"
+                                                          Checked="DeviceToggle_Changed"
+                                                          Unchecked="DeviceToggle_Changed"
+                                                          Tag="{Binding Id}"
+                                                          ToolTip="Habilitar/Desabilitar espelhamento para este dispositivo"
+                                                          AutomationProperties.Name="{Binding Name, StringFormat='Ativar espelhamento para {0}'}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
                 </ScrollViewer>
             </Grid>
 
             <!-- 5. QUICK SETTINGS CARD -->
-            <Border Grid.Row="4" Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderDarkBrush}"
+            <Border Grid.Row="5" Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderDarkBrush}"
                     BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,10">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -380,18 +454,21 @@
                         <CheckBox x:Name="ChkStartWithWindows" Content="Iniciar com o Windows"
                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"
                                   Checked="ChkStartWithWindows_Changed" Unchecked="ChkStartWithWindows_Changed"
-                                  Margin="0,0,18,0" Cursor="Hand" />
+                                  Margin="0,0,18,0" Cursor="Hand"
+                                  AutomationProperties.Name="Iniciar AudioJoiner com o Windows" />
                         <CheckBox x:Name="ChkStartMinimized" Content="Iniciar minimizado"
                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"
                                   Checked="ChkStartMinimized_Changed" Unchecked="ChkStartMinimized_Changed"
-                                  Cursor="Hand" />
+                                  Cursor="Hand"
+                                  AutomationProperties.Name="Iniciar minimizado na bandeja" />
                     </StackPanel>
 
                     <!-- Latency Preset Selector -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="Latência:" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,6,0" />
                         <ComboBox x:Name="CmbLatency" Style="{StaticResource ModernComboBox}" Height="28" Width="135" FontSize="11"
-                                  SelectionChanged="CmbLatency_SelectionChanged">
+                                  SelectionChanged="CmbLatency_SelectionChanged"
+                                  AutomationProperties.Name="Configuração de Latência do Áudio">
                             <ComboBoxItem Content="20 ms (Ultra-baixa)" Tag="20" />
                             <ComboBoxItem Content="25 ms (Recomendada)" Tag="25" IsSelected="True" />
                             <ComboBoxItem Content="40 ms (Estável)" Tag="40" />
@@ -402,10 +479,10 @@
             </Border>
 
             <!-- 6. FOOTER INFO -->
-            <Grid Grid.Row="5">
+            <Grid Grid.Row="6">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="AudioJoiner • " FontSize="10.5" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" />
-                    <Button Style="{StaticResource SubtleIconButton}" Padding="2,0" VerticalAlignment="Center" Click="BtnAbout_Click" ToolTip="Sobre o Desenvolvedor">
+                    <Button Style="{StaticResource SubtleIconButton}" Padding="2,0" VerticalAlignment="Center" Click="BtnAbout_Click" ToolTip="Sobre o Desenvolvedor" AutomationProperties.Name="Abrir informações sobre o desenvolvedor">
                         <TextBlock Text="Desenvolvido por Rafael Lannes (rafael-lannes.github.io)" FontSize="10.5" Foreground="{StaticResource AccentSkyBrush}" FontWeight="SemiBold" TextDecorations="Underline" />
                     </Button>
                 </StackPanel>

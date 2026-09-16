@@ -9,6 +9,9 @@ using AudioJoiner.Services;
 using WpfButton = System.Windows.Controls.Button;
 using WpfCheckBox = System.Windows.Controls.CheckBox;
 using WpfMessageBox = System.Windows.MessageBox;
+using WpfTextBox = System.Windows.Controls.TextBox;
+using MediaColor = System.Windows.Media.Color;
+using MediaColorConverter = System.Windows.Media.ColorConverter;
 
 namespace AudioJoiner.UI;
 
@@ -97,6 +100,7 @@ public partial class MainWindow : Window
 
         // Equalizer settings
         ChkEqEnable.IsChecked = _audioService.IsEqualizerEnabled;
+        TxtEqExpandChevron.Text = _audioService.IsEqualizerExpanded ? "⌃" : "⌵";
         if (_audioService.SelectedEqualizerPreset != null)
         {
             CmbEqPreset.SelectedItem = _audioService.SelectedEqualizerPreset;
@@ -107,8 +111,13 @@ public partial class MainWindow : Window
     {
         bool isRunning = _audioService.IsRunning;
         int totalActive = _audioService.Devices.Count(d => d.IsMirrorEnabled && !d.IsSource && d.IsAvailable);
+        bool hasOutputs = _audioService.Devices.Any(d => !d.IsSource && d.IsAvailable);
 
         TxtActiveDestCount.Text = $"{totalActive} ativa{(totalActive != 1 ? "s" : "")}";
+        TxtEqExpandChevron.Text = _audioService.IsEqualizerExpanded ? "⌃" : "⌵";
+
+        EmptyStateCard.Visibility = hasOutputs ? Visibility.Collapsed : Visibility.Visible;
+        ListOutputDevices.Visibility = hasOutputs ? Visibility.Visible : Visibility.Collapsed;
 
         if (isRunning)
         {
@@ -154,6 +163,26 @@ public partial class MainWindow : Window
         TxtMemoryUsage.Text = $"RAM: {memoryMb:0.0} MB";
     }
 
+    public void ShowInlineAlert(string message, bool isError = false)
+    {
+        TxtInlineAlert.Text = message;
+        TxtInlineAlert.Foreground = isError 
+            ? new SolidColorBrush((MediaColor)MediaColorConverter.ConvertFromString("#FCA5A5")) 
+            : (SolidColorBrush)FindResource("AccentSkyBrush");
+        InlineAlertBar.Background = isError
+            ? new SolidColorBrush((MediaColor)MediaColorConverter.ConvertFromString("#231718"))
+            : new SolidColorBrush((MediaColor)MediaColorConverter.ConvertFromString("#132338"));
+        InlineAlertBar.BorderBrush = isError
+            ? (SolidColorBrush)FindResource("AccentCoralBrush")
+            : (SolidColorBrush)FindResource("AccentSkyBrush");
+        InlineAlertBar.Visibility = Visibility.Visible;
+    }
+
+    private void BtnDismissAlert_Click(object sender, RoutedEventArgs e)
+    {
+        InlineAlertBar.Visibility = Visibility.Collapsed;
+    }
+
     private void OnAudioEngineStateChanged()
     {
         Dispatcher.Invoke(UpdateUiState);
@@ -163,6 +192,7 @@ public partial class MainWindow : Window
     {
         Dispatcher.Invoke(() =>
         {
+            ShowInlineAlert(errorMessage, isError: true);
             _trayIconManager.ShowNotification("AudioJoiner - Alerta", errorMessage, System.Windows.Forms.ToolTipIcon.Warning);
         });
     }
@@ -173,6 +203,31 @@ public partial class MainWindow : Window
         {
             _trayIconManager.ShowNotification("AudioJoiner", statusMessage, System.Windows.Forms.ToolTipIcon.Info);
         });
+    }
+
+    private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        // Don't intercept Space if focused inside a text box or combo dropdown search
+        if (e.Key == Key.Space && !(Keyboard.FocusedElement is WpfTextBox))
+        {
+            e.Handled = true;
+            BtnToggleMirror_Click(BtnToggleMirror, new RoutedEventArgs());
+        }
+        else if (e.Key == Key.F5 || (e.Key == Key.R && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control))
+        {
+            e.Handled = true;
+            BtnRefreshDevices_Click(this, new RoutedEventArgs());
+        }
+        else if (e.Key == Key.E && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+        {
+            e.Handled = true;
+            BtnToggleEqExpand_Click(this, new RoutedEventArgs());
+        }
+        else if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Hide();
+        }
     }
 
     private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
@@ -221,6 +276,14 @@ public partial class MainWindow : Window
         }
         else
         {
+            bool hasActiveOutputs = _audioService.Devices.Any(d => d.IsMirrorEnabled && !d.IsSource && d.IsAvailable);
+            if (!hasActiveOutputs)
+            {
+                ShowInlineAlert("Selecione ao menos um dispositivo de destino abaixo para iniciar o espelhamento.", isError: false);
+                return;
+            }
+
+            InlineAlertBar.Visibility = Visibility.Collapsed;
             _audioService.StartMirroring();
         }
     }
@@ -247,6 +310,11 @@ public partial class MainWindow : Window
         _audioService.MasterVolume = vol;
     }
 
+    private void SliderMasterVolume_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        SliderMasterVolume.Value = 1.0;
+    }
+
     private void DeviceToggle_Changed(object sender, RoutedEventArgs e)
     {
         if (_isInitializing) return;
@@ -269,7 +337,34 @@ public partial class MainWindow : Window
         }
     }
 
+    private void DeviceVolumeSlider_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is Slider slider && slider.Tag is string deviceId)
+        {
+            slider.Value = 1.0;
+            _audioService.SetDeviceVolume(deviceId, 1.0f);
+        }
+    }
+
+    private void BtnEnableAll_Click(object sender, RoutedEventArgs e)
+    {
+        _audioService.EnableAllDevices();
+        UpdateUiState();
+    }
+
+    private void BtnDisableAll_Click(object sender, RoutedEventArgs e)
+    {
+        _audioService.DisableAllDevices();
+        UpdateUiState();
+    }
+
     #region Equalizer UI Handlers
+
+    private void BtnToggleEqExpand_Click(object sender, RoutedEventArgs e)
+    {
+        _audioService.IsEqualizerExpanded = !_audioService.IsEqualizerExpanded;
+        TxtEqExpandChevron.Text = _audioService.IsEqualizerExpanded ? "⌃" : "⌵";
+    }
 
     private void CmbEqPreset_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -305,6 +400,15 @@ public partial class MainWindow : Window
                     CmbEqPreset.SelectedItem = customPreset;
                 }
             }
+        }
+    }
+
+    private void EqSlider_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is Slider slider && slider.Tag is int bandIndex)
+        {
+            slider.Value = 0.0;
+            _audioService.SetEqualizerBandGain(bandIndex, 0f);
         }
     }
 
