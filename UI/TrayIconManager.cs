@@ -104,28 +104,37 @@ public class TrayIconManager : IDisposable
     {
         if (_isDisposed) return;
 
-        bool isRunning = _audioService.IsRunning;
-        int activeDirect = _audioService.Devices.Count(d => d.IsMirrorEnabled && !d.IsSource && d.IsAvailable);
-        int totalCount = activeDirect;
+        try
+        {
+            bool isRunning = _audioService.IsRunning;
+            int activeDirect = _audioService.Devices.Count(d => d.IsMirrorEnabled && !d.IsSource && d.IsAvailable);
+            int totalCount = activeDirect;
 
-        if (isRunning)
-        {
-            _notifyIcon.Text = $"AudioJoiner: Espelhando ({totalCount} saídas)";
-            _statusMenuItem.Text = $"● Espelhando ({totalCount} saídas)";
-            _toggleMirrorMenuItem.Text = "⏹ Parar Espelhamento";
+            if (isRunning)
+            {
+                string text = $"AudioJoiner: Espelhando ({totalCount} saídas)";
+                _notifyIcon.Text = text.Length > 63 ? text.Substring(0, 63) : text;
+                _statusMenuItem.Text = $"● Espelhando ({totalCount} saídas)";
+                _toggleMirrorMenuItem.Text = "⏹ Parar Espelhamento";
+            }
+            else
+            {
+                _notifyIcon.Text = "AudioJoiner - Multi-Output Audio";
+                _statusMenuItem.Text = "○ Espelhamento Parado";
+                _toggleMirrorMenuItem.Text = "▶ Iniciar Espelhamento";
+            }
         }
-        else
-        {
-            _notifyIcon.Text = "AudioJoiner: Parado";
-            _statusMenuItem.Text = "○ Espelhamento Parado";
-            _toggleMirrorMenuItem.Text = "▶ Iniciar Espelhamento";
-        }
+        catch { }
     }
 
     public void ShowNotification(string title, string message, ToolTipIcon icon = ToolTipIcon.Info)
     {
         if (_isDisposed) return;
-        _notifyIcon.ShowBalloonTip(2500, title, message, icon);
+        try
+        {
+            _notifyIcon.ShowBalloonTip(2500, title, message, icon);
+        }
+        catch { }
     }
 
     private void OnToggleMirrorClicked(object? sender, EventArgs e)

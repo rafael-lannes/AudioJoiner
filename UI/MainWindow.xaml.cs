@@ -54,21 +54,19 @@ public partial class MainWindow : Window
 
         UpdateUiState();
 
-        if (startMinimized || _settingsService.CurrentSettings.StartMinimized)
-        {
-            WindowState = WindowState.Minimized;
-            Hide();
-        }
-
         if (_settingsService.CurrentSettings.AutoStartMirroring)
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                bool hasActiveOutputs = _audioService.Devices.Any(d => d.IsMirrorEnabled && !d.IsSource);
-                if (!_audioService.IsRunning && hasActiveOutputs)
+                try
                 {
-                    _audioService.StartMirroring();
+                    bool hasActiveOutputs = _audioService.Devices.Any(d => d.IsMirrorEnabled && !d.IsSource && d.IsAvailable);
+                    if (!_audioService.IsRunning && hasActiveOutputs)
+                    {
+                        _audioService.StartMirroring();
+                    }
                 }
+                catch { }
             }), DispatcherPriority.Background);
         }
     }

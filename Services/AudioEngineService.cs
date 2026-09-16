@@ -164,12 +164,23 @@ public class AudioEngineService : IAudioEngineService
 
     public void RefreshDevices()
     {
-        _dispatcher.Invoke(() =>
+        void UpdateList()
         {
             try
             {
-                var currentDefault = _deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-                var activeEndpoints = _deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active).ToList();
+                MMDevice? currentDefault = null;
+                try
+                {
+                    currentDefault = _deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+                }
+                catch { }
+
+                List<MMDevice> activeEndpoints = new();
+                try
+                {
+                    activeEndpoints = _deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active).ToList();
+                }
+                catch { }
 
                 var existingMap = Devices.ToDictionary(d => d.Id);
                 var newDeviceIds = new HashSet<string>();
@@ -201,7 +212,7 @@ public class AudioEngineService : IAudioEngineService
                         {
                             Id = id,
                             Name = endpoint.FriendlyName,
-                            AdapterName = endpoint.DeviceTopology?.ToString() ?? "Dispositivo de Áudio",
+                            AdapterName = "Dispositivo de Áudio",
                             IsDefault = isDefault,
                             IconType = ClassifyDeviceIcon(endpoint.FriendlyName),
                             IsAvailable = true,
@@ -257,7 +268,16 @@ public class AudioEngineService : IAudioEngineService
             {
                 System.Diagnostics.Debug.WriteLine($"Error refreshing devices: {ex.Message}");
             }
-        });
+        }
+
+        if (_dispatcher.CheckAccess())
+        {
+            UpdateList();
+        }
+        else
+        {
+            _dispatcher.Invoke(UpdateList);
+        }
     }
 
     private void UpdateSourceFlag()
