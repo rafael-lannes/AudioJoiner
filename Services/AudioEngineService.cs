@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows.Threading;
 using AudioJoiner.Models;
 using NAudio.CoreAudioApi;
@@ -7,7 +9,7 @@ using NAudio.Wave;
 
 namespace AudioJoiner.Services;
 
-public class AudioEngineService : IAudioEngineService
+public class AudioEngineService : IAudioEngineService, INotifyPropertyChanged
 {
     private readonly MMDeviceEnumerator _deviceEnumerator;
     private readonly DeviceNotificationClient _notificationClient;
@@ -89,6 +91,7 @@ public class AudioEngineService : IAudioEngineService
                     }
                 }
                 SaveDeviceSettings();
+                OnPropertyChanged();
                 StateChanged?.Invoke();
             }
         }
@@ -103,6 +106,7 @@ public class AudioEngineService : IAudioEngineService
             {
                 _isEqualizerExpanded = value;
                 SaveDeviceSettings();
+                OnPropertyChanged();
                 StateChanged?.Invoke();
             }
         }
@@ -116,14 +120,21 @@ public class AudioEngineService : IAudioEngineService
             if (_selectedEqualizerPreset != value)
             {
                 _selectedEqualizerPreset = value;
+                OnPropertyChanged();
                 StateChanged?.Invoke();
             }
         }
     }
 
+    public event PropertyChangedEventHandler? PropertyChanged;
     public event Action? StateChanged;
     public event Action<string>? DeviceStatusChanged;
     public event Action<string>? ErrorOccurred;
+
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 
     public AudioEngineService(SettingsService settingsService, Dispatcher dispatcher)
     {

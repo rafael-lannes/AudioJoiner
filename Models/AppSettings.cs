@@ -10,7 +10,7 @@ public class DeviceSetting
 public class EqualizerSettings
 {
     public bool IsEnabled { get; set; } = true;
-    public bool IsExpanded { get; set; } = false;
+    public bool IsExpanded { get; set; } = true;
     public string SelectedPreset { get; set; } = "Flat (Padrão)";
     public float[] BandGains { get; set; } = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 }

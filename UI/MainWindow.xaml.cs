@@ -39,6 +39,7 @@ public partial class MainWindow : Window
         ListOutputDevices.ItemsSource = _audioService.Devices;
         CmbSourceDevice.ItemsSource = _audioService.Devices;
         CmbEqPreset.ItemsSource = _audioService.EqualizerPresets;
+        ListEqBands.ItemsSource = _audioService.EqualizerBands;
 
         RestoreUiSettings();
 
@@ -100,7 +101,9 @@ public partial class MainWindow : Window
 
         // Equalizer settings
         ChkEqEnable.IsChecked = _audioService.IsEqualizerEnabled;
-        TxtEqExpandChevron.Text = _audioService.IsEqualizerExpanded ? "⌃" : "⌵";
+        TxtEqExpandChevron.Text = _audioService.IsEqualizerExpanded ? "▲" : "▼";
+        EqBandsContainer.Visibility = _audioService.IsEqualizerExpanded ? Visibility.Visible : Visibility.Collapsed;
+        EqBandsContainer.Opacity = _audioService.IsEqualizerEnabled ? 1.0 : 0.45;
         if (_audioService.SelectedEqualizerPreset != null)
         {
             CmbEqPreset.SelectedItem = _audioService.SelectedEqualizerPreset;
@@ -114,7 +117,9 @@ public partial class MainWindow : Window
         bool hasOutputs = _audioService.Devices.Any(d => !d.IsSource && d.IsAvailable);
 
         TxtActiveDestCount.Text = $"{totalActive} ativa{(totalActive != 1 ? "s" : "")}";
-        TxtEqExpandChevron.Text = _audioService.IsEqualizerExpanded ? "⌃" : "⌵";
+        TxtEqExpandChevron.Text = _audioService.IsEqualizerExpanded ? "▲" : "▼";
+        EqBandsContainer.Visibility = _audioService.IsEqualizerExpanded ? Visibility.Visible : Visibility.Collapsed;
+        EqBandsContainer.Opacity = _audioService.IsEqualizerEnabled ? 1.0 : 0.45;
 
         EmptyStateCard.Visibility = hasOutputs ? Visibility.Collapsed : Visibility.Visible;
         ListOutputDevices.Visibility = hasOutputs ? Visibility.Visible : Visibility.Collapsed;
@@ -363,7 +368,8 @@ public partial class MainWindow : Window
     private void BtnToggleEqExpand_Click(object sender, RoutedEventArgs e)
     {
         _audioService.IsEqualizerExpanded = !_audioService.IsEqualizerExpanded;
-        TxtEqExpandChevron.Text = _audioService.IsEqualizerExpanded ? "⌃" : "⌵";
+        EqBandsContainer.Visibility = _audioService.IsEqualizerExpanded ? Visibility.Visible : Visibility.Collapsed;
+        TxtEqExpandChevron.Text = _audioService.IsEqualizerExpanded ? "▲" : "▼";
     }
 
     private void CmbEqPreset_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -381,6 +387,7 @@ public partial class MainWindow : Window
         if (_isInitializing) return;
 
         _audioService.IsEqualizerEnabled = ChkEqEnable.IsChecked == true;
+        EqBandsContainer.Opacity = _audioService.IsEqualizerEnabled ? 1.0 : 0.45;
     }
 
     private void EqSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

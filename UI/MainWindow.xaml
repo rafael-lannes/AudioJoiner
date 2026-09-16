@@ -209,14 +209,19 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <!-- Title with Icon -->
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border Width="26" Height="26" CornerRadius="6" Background="#2A2F40" Margin="0,0,8,0" VerticalAlignment="Center">
-                                <Path Fill="{StaticResource AccentSkyBrush}" Width="14" Height="14" Stretch="Uniform"
-                                      Data="M10 20h4V4h-4v16zm-6 0h4v-8H4v8zM16 9v11h4V9h-4z" />
-                            </Border>
-                            <TextBlock Text="EQUALIZADOR DSP" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <!-- Title with Icon (Clickable to toggle expand) -->
+                        <Button Grid.Column="0" Style="{StaticResource SubtleIconButton}" Padding="2"
+                                Click="BtnToggleEqExpand_Click"
+                                ToolTip="Expandir / Recolher Equalizador (Ctrl+E)"
+                                AutomationProperties.Name="Expandir ou Recolher Equalizador">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Width="26" Height="26" CornerRadius="6" Background="#2A2F40" Margin="0,0,8,0" VerticalAlignment="Center">
+                                    <Path Fill="{StaticResource AccentSkyBrush}" Width="14" Height="14" Stretch="Uniform"
+                                          Data="M10 20h4V4h-4v16zm-6 0h4v-8H4v8zM16 9v11h4V9h-4z" />
+                                </Border>
+                                <TextBlock Text="EQUALIZADOR DSP" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
 
                         <!-- Presets Selector & Reset Button -->
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -241,18 +246,17 @@
                                       AutomationProperties.Name="Ativar Equalizador DSP" />
 
                             <!-- Expand / Collapse Chevron Button -->
-                            <Button Style="{StaticResource SubtleIconButton}" Padding="6,2" Margin="6,0,0,0"
+                            <Button Style="{StaticResource SubtleIconButton}" Padding="8,4" Margin="6,0,0,0"
                                     Click="BtnToggleEqExpand_Click"
                                     ToolTip="Expandir / Recolher Sliders do Equalizador (Ctrl+E)"
                                     AutomationProperties.Name="Expandir ou Recolher Equalizador">
-                                <TextBlock x:Name="TxtEqExpandChevron" Text="⌵" FontSize="13" FontWeight="Bold" Foreground="{StaticResource AccentSkyBrush}" />
+                                <TextBlock x:Name="TxtEqExpandChevron" Text="▲" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentSkyBrush}" />
                             </Button>
                         </StackPanel>
                     </Grid>
 
                     <!-- 10 Vertical Sliders Grid (Progressive Disclosure) -->
-                    <Grid Grid.Row="1" x:Name="EqBandsContainer" Margin="0,12,0,4"
-                          Visibility="{Binding IsEqualizerExpanded, Converter={StaticResource BoolToVis}}">
+                    <Grid Grid.Row="1" x:Name="EqBandsContainer" Margin="0,12,0,4">
                         <ItemsControl x:Name="ListEqBands" ItemsSource="{Binding EqualizerBands}"
                                       KeyboardNavigation.TabNavigation="Once">
                             <ItemsControl.ItemsPanel>
