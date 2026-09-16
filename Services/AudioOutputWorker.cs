@@ -1,7 +1,7 @@
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
-using System.Runtime.InteropServices;
+using AudioJoiner.Models;
 
 namespace AudioJoiner.Services;
 
@@ -10,8 +10,12 @@ public class AudioOutputWorker : IDisposable
     private readonly MMDevice _device;
     private readonly WaveFormat _sourceWaveFormat;
     private readonly int _latencyMs;
+    private readonly IList<EqualizerBand> _initialBands;
+    private readonly bool _initialEqEnabled;
+
     private WasapiOut? _wasapiOut;
     private BufferedWaveProvider? _bufferedWaveProvider;
+    private EqualizerSampleProvider? _equalizer;
     private MeteredVolumeSampleProvider? _meteredVolume;
     private float _deviceVolume = 1.0f;
     private float _masterVolume = 1.0f;
@@ -25,13 +29,15 @@ public class AudioOutputWorker : IDisposable
 
     public event Action<AudioOutputWorker, Exception>? PlaybackError;
 
-    public AudioOutputWorker(MMDevice device, WaveFormat sourceWaveFormat, int latencyMs = 25, float initialVolume = 1.0f, float masterVolume = 1.0f)
+    public AudioOutputWorker(MMDevice device, WaveFormat sourceWaveFormat, int latencyMs = 25, float initialVolume = 1.0f, float masterVolume = 1.0f, IList<EqualizerBand>? equalizerBands = null, bool isEqEnabled = true)
     {
         _device = device;
         _sourceWaveFormat = sourceWaveFormat;
         _latencyMs = Math.Clamp(latencyMs, 10, 100);
         _deviceVolume = initialVolume;
         _masterVolume = masterVolume;
+        _initialBands = equalizerBands ?? Array.Empty<EqualizerBand>();
+        _initialEqEnabled = isEqEnabled;
     }
 
     public void Start()
@@ -42,40 +48,47 @@ public class AudioOutputWorker : IDisposable
 
             try
             {
-                // Obter o mix format do dispositivo de destino para saber taxa de amostragem nativa
                 WaveFormat targetMixFormat = _device.AudioClient.MixFormat;
 
-                // Configurar o buffer de entrada com capacidade pequena (~120ms) para evitar atraso/drift
                 _bufferedWaveProvider = new BufferedWaveProvider(_sourceWaveFormat)
                 {
                     BufferDuration = TimeSpan.FromMilliseconds(120),
                     DiscardOnBufferOverflow = true,
-                    ReadFully = true // Garante silêncio quando o buffer esvaziar, sem travar o WASAPI
+                    ReadFully = true
                 };
 
-                // Cadeia de processamento de amostras (Float 32-bit)
                 ISampleProvider sampleProvider = _bufferedWaveProvider.ToSampleProvider();
 
-                // 1. Adaptação de canais (ex: se a fonte for 5.1/7.1 e destino for estéreo, ou mono para estéreo)
+                // 1. Adaptação de canais (ex: 5.1/7.1 surround para estéreo ou mono para estéreo)
                 int targetChannels = targetMixFormat.Channels > 0 ? targetMixFormat.Channels : 2;
                 if (_sourceWaveFormat.Channels != targetChannels)
                 {
                     sampleProvider = new ChannelAdapterSampleProvider(sampleProvider, targetChannels);
                 }
 
-                // 2. Reamostragem (Resampling dinâmico se a taxa da fonte for diferente do destino, ex: 48kHz vs 44.1kHz)
+                // 2. Reamostragem (Resampling dinâmico se a taxa da fonte for diferente do destino)
                 if (sampleProvider.WaveFormat.SampleRate != targetMixFormat.SampleRate)
                 {
                     sampleProvider = new WdlResamplingSampleProvider(sampleProvider, targetMixFormat.SampleRate);
                 }
 
-                // 3. Controle de Ganho/Volume individual e Master + Medição de VU
+                // 3. DSP Equalizador Multi-Bandas em Tempo Real
+                if (_initialBands.Count > 0)
+                {
+                    _equalizer = new EqualizerSampleProvider(sampleProvider, _initialBands)
+                    {
+                        IsEnabled = _initialEqEnabled
+                    };
+                    sampleProvider = _equalizer;
+                }
+
+                // 4. Ganho e Medidor de VU
                 _meteredVolume = new MeteredVolumeSampleProvider(sampleProvider)
                 {
                     Volume = _deviceVolume * _masterVolume
                 };
 
-                // 4. Provedor final para o WASAPI
+                // 5. Provedor final para o WASAPI
                 IWaveProvider finalWaveProvider;
                 if (targetMixFormat.Encoding == WaveFormatEncoding.IeeeFloat)
                 {
@@ -90,7 +103,6 @@ public class AudioOutputWorker : IDisposable
                     finalWaveProvider = _meteredVolume.ToWaveProvider();
                 }
 
-                // Inicializar WasapiOut em modo compartilhado com baixa latência
                 _wasapiOut = new WasapiOut(_device, AudioClientShareMode.Shared, useEventSync: true, latency: _latencyMs);
                 _wasapiOut.PlaybackStopped += OnPlaybackStopped;
                 _wasapiOut.Init(finalWaveProvider);
@@ -128,6 +140,24 @@ public class AudioOutputWorker : IDisposable
         {
             _meteredVolume.Volume = _deviceVolume * _masterVolume;
         }
+    }
+
+    public void SetEqualizerEnabled(bool isEnabled)
+    {
+        if (_equalizer != null)
+        {
+            _equalizer.IsEnabled = isEnabled;
+        }
+    }
+
+    public void SetEqualizerBand(int bandIndex, float gainDb)
+    {
+        _equalizer?.UpdateBand(bandIndex, gainDb);
+    }
+
+    public void SetEqualizerAllBands(float[] gains)
+    {
+        _equalizer?.UpdateAllBands(gains);
     }
 
     private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
@@ -169,6 +199,7 @@ public class AudioOutputWorker : IDisposable
                 _bufferedWaveProvider = null;
             }
 
+            _equalizer = null;
             _meteredVolume = null;
         }
     }

@@ -28,15 +28,16 @@ public partial class MainWindow : Window
         _audioService = audioService;
         _settingsService = settingsService;
 
+        DataContext = _audioService;
+
         _trayIconManager = new TrayIconManager(_audioService, ShowAndActivateWindow, CloseApplicationPermanently, ShowAboutDialog);
 
         // Data bindings
         ListOutputDevices.ItemsSource = _audioService.Devices;
-        ListGroupDevices.ItemsSource = _audioService.Groups;
         CmbSourceDevice.ItemsSource = _audioService.Devices;
+        CmbEqPreset.ItemsSource = _audioService.EqualizerPresets;
 
         RestoreUiSettings();
-        CheckVirtualDriverBanner();
 
         _audioService.StateChanged += OnAudioEngineStateChanged;
         _audioService.ErrorOccurred += OnAudioEngineError;
@@ -63,20 +64,13 @@ public partial class MainWindow : Window
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                bool hasActiveOutputs = _audioService.Devices.Any(d => d.IsMirrorEnabled && !d.IsSource) ||
-                                        _audioService.Groups.Any(g => g.IsEnabled && g.Members.Any(m => !m.IsSource));
+                bool hasActiveOutputs = _audioService.Devices.Any(d => d.IsMirrorEnabled && !d.IsSource);
                 if (!_audioService.IsRunning && hasActiveOutputs)
                 {
                     _audioService.StartMirroring();
                 }
             }), DispatcherPriority.Background);
         }
-    }
-
-    private void CheckVirtualDriverBanner()
-    {
-        bool hasVirtual = _audioService.VirtualService.IsVirtualDriverInstalled();
-        BannerVirtualDriver.Visibility = hasVirtual ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void RestoreUiSettings()
@@ -102,14 +96,19 @@ public partial class MainWindow : Window
                 break;
             }
         }
+
+        // Equalizer settings
+        ChkEqEnable.IsChecked = _audioService.IsEqualizerEnabled;
+        if (_audioService.SelectedEqualizerPreset != null)
+        {
+            CmbEqPreset.SelectedItem = _audioService.SelectedEqualizerPreset;
+        }
     }
 
     private void UpdateUiState()
     {
         bool isRunning = _audioService.IsRunning;
-        int activeDirectOutputs = _audioService.Devices.Count(d => d.IsMirrorEnabled && !d.IsSource && d.IsAvailable);
-        int activeGroupOutputs = _audioService.Groups.Where(g => g.IsEnabled).SelectMany(g => g.Members.Where(m => !m.IsSource && m.IsAvailable)).DistinctBy(m => m.Id).Count();
-        int totalActive = activeDirectOutputs + activeGroupOutputs;
+        int totalActive = _audioService.Devices.Count(d => d.IsMirrorEnabled && !d.IsSource && d.IsAvailable);
 
         TxtActiveDestCount.Text = $"{totalActive} ativa{(totalActive != 1 ? "s" : "")}";
 
@@ -272,109 +271,56 @@ public partial class MainWindow : Window
         }
     }
 
-    private void BtnCreateGroup_Click(object sender, RoutedEventArgs e)
-    {
-        var dialog = new GroupEditDialog(_audioService.Devices)
-        {
-            Owner = this
-        };
+    #region Equalizer UI Handlers
 
-        if (dialog.ShowDialog() == true)
+    private void CmbEqPreset_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+
+        if (CmbEqPreset.SelectedItem is EqualizerPreset preset)
         {
-            _audioService.CreateOrUpdateGroup(null, dialog.GroupName, dialog.SelectedDeviceIds, 1.0f, dialog.SelectedVirtualDeviceId, dialog.SelectedVirtualDeviceName);
-            CheckVirtualDriverBanner();
-            UpdateUiState();
+            _audioService.ApplyEqualizerPreset(preset);
         }
     }
 
-    private void BtnEditGroup_Click(object sender, RoutedEventArgs e)
+    private void ChkEqEnable_Changed(object sender, RoutedEventArgs e)
     {
-        if (sender is WpfButton btn && btn.Tag is AudioGroupInfo group)
-        {
-            var dialog = new GroupEditDialog(_audioService.Devices, group)
-            {
-                Owner = this
-            };
+        if (_isInitializing) return;
 
-            if (dialog.ShowDialog() == true)
+        _audioService.IsEqualizerEnabled = ChkEqEnable.IsChecked == true;
+    }
+
+    private void EqSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_isInitializing) return;
+
+        if (sender is Slider slider && slider.Tag is int bandIndex)
+        {
+            _audioService.SetEqualizerBandGain(bandIndex, (float)e.NewValue);
+
+            // If preset was something else and user moves slider, switch preset selection to Custom
+            if (CmbEqPreset.SelectedItem is EqualizerPreset preset && preset.Name != "Personalizado")
             {
-                _audioService.CreateOrUpdateGroup(group.Id, dialog.GroupName, dialog.SelectedDeviceIds, group.Volume, dialog.SelectedVirtualDeviceId, dialog.SelectedVirtualDeviceName);
-                CheckVirtualDriverBanner();
-                UpdateUiState();
+                var customPreset = _audioService.EqualizerPresets.FirstOrDefault(p => p.Name == "Personalizado");
+                if (customPreset != null)
+                {
+                    CmbEqPreset.SelectedItem = customPreset;
+                }
             }
         }
     }
 
-    private void BtnDeleteGroup_Click(object sender, RoutedEventArgs e)
+    private void BtnResetEq_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is WpfButton btn && btn.Tag is string groupId)
-        {
-            var result = WpfMessageBox.Show("Deseja realmente remover este grupo de dispositivos unificados?", "Remover Grupo", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
-            {
-                _audioService.DeleteGroup(groupId);
-                UpdateUiState();
-            }
-        }
+        _audioService.ResetEqualizer();
+        CmbEqPreset.SelectedItem = _audioService.SelectedEqualizerPreset;
     }
 
-    private void BtnToggleGroupExpand_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is WpfButton btn && btn.Tag is AudioGroupInfo group)
-        {
-            group.IsExpanded = !group.IsExpanded;
-        }
-    }
-
-    private void BtnSetGroupDefault_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is WpfButton btn && btn.Tag is string groupId)
-        {
-            _audioService.SetGroupAsDefaultWindowsDevice(groupId);
-        }
-    }
-
-    private async void BtnBannerInstallDriver_Click(object sender, RoutedEventArgs e)
-    {
-        bool success = await _audioService.VirtualService.DownloadAndInstallVirtualDriverAsync(msg =>
-        {
-            _trayIconManager.ShowNotification("AudioJoiner", msg, System.Windows.Forms.ToolTipIcon.Info);
-        });
-
-        if (success)
-        {
-            await Task.Delay(4000);
-            _audioService.RefreshDevices();
-            CheckVirtualDriverBanner();
-        }
-    }
-
-    private void GroupToggle_Changed(object sender, RoutedEventArgs e)
-    {
-        if (_isInitializing) return;
-
-        if (sender is WpfCheckBox chk && chk.Tag is string groupId)
-        {
-            bool isChecked = chk.IsChecked == true;
-            _audioService.SetGroupState(groupId, isChecked);
-            UpdateUiState();
-        }
-    }
-
-    private void GroupVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-        if (_isInitializing) return;
-
-        if (sender is Slider slider && slider.Tag is string groupId)
-        {
-            _audioService.SetGroupVolume(groupId, (float)e.NewValue);
-        }
-    }
+    #endregion
 
     private void BtnRefreshDevices_Click(object sender, RoutedEventArgs e)
     {
         _audioService.RefreshDevices();
-        CheckVirtualDriverBanner();
         if (_audioService.SelectedSourceDevice != null)
         {
             CmbSourceDevice.SelectedItem = _audioService.SelectedSourceDevice;

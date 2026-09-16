@@ -34,7 +34,7 @@ public class TrayIconManager : IDisposable
         var contextMenu = new ContextMenuStrip();
         contextMenu.ShowImageMargin = false;
 
-        var headerItem = new ToolStripMenuItem("AudioJoiner v1.2")
+        var headerItem = new ToolStripMenuItem("AudioJoiner v1.3")
         {
             Enabled = false,
             Font = new Font("Segoe UI", 9, FontStyle.Bold)
@@ -106,8 +106,7 @@ public class TrayIconManager : IDisposable
 
         bool isRunning = _audioService.IsRunning;
         int activeDirect = _audioService.Devices.Count(d => d.IsMirrorEnabled && !d.IsSource && d.IsAvailable);
-        int activeGroups = _audioService.Groups.Where(g => g.IsEnabled).SelectMany(g => g.Members.Where(m => !m.IsSource && m.IsAvailable)).DistinctBy(m => m.Id).Count();
-        int totalCount = activeDirect + activeGroups;
+        int totalCount = activeDirect;
 
         if (isRunning)
         {

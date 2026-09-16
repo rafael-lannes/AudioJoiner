@@ -6,8 +6,8 @@
         xmlns:converters="clr-namespace:AudioJoiner.UI.Converters"
         mc:Ignorable="d"
         Title="AudioJoiner - Multi-Output Audio Cloner"
-        Height="840" Width="660"
-        MinHeight="700" MinWidth="560"
+        Height="860" Width="680"
+        MinHeight="720" MinWidth="580"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -41,9 +41,9 @@
         <Grid Margin="18">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" /> <!-- Custom Title Bar -->
-                <RowDefinition Height="Auto" /> <!-- Virtual Driver Banner (if needed) -->
                 <RowDefinition Height="Auto" /> <!-- Master Control Card -->
-                <RowDefinition Height="*" />    <!-- Destination Devices & Groups List -->
+                <RowDefinition Height="Auto" /> <!-- Equalizer Card -->
+                <RowDefinition Height="*" />    <!-- Destination Devices List -->
                 <RowDefinition Height="Auto" /> <!-- Quick Settings Card -->
                 <RowDefinition Height="Auto" /> <!-- Footer -->
             </Grid.RowDefinitions>
@@ -67,10 +67,10 @@
                             <TextBlock Text="Audio" FontWeight="Bold" FontSize="16" Foreground="{StaticResource TextPrimaryBrush}" />
                             <TextBlock Text="Joiner" FontWeight="Bold" FontSize="16" Foreground="{StaticResource AccentSkyBrush}" />
                             <Border Background="#2A2F40" CornerRadius="4" Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="v1.2" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBlock Text="v1.3" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" />
                             </Border>
                         </StackPanel>
-                        <TextBlock Text="Clonador &amp; Unificador de Áudio do Windows" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,1,0,0" />
+                        <TextBlock Text="Clonador Multi-Output &amp; Equalizador DSP" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,1,0,0" />
                     </StackPanel>
                 </StackPanel>
 
@@ -102,27 +102,9 @@
                 </StackPanel>
             </Grid>
 
-            <!-- 2. VIRTUAL DRIVER BANNER (If not installed) -->
-            <Border Grid.Row="1" x:Name="BannerVirtualDriver" Background="#1E2333" BorderBrush="#3B82F6" BorderThickness="1"
-                    CornerRadius="8" Padding="12,8" Margin="0,0,0,12" Visibility="Collapsed">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="💡 Faça os grupos aparecerem no menu de som do Windows" FontWeight="Bold" FontSize="11.5" Foreground="{StaticResource AccentSkyBrush}" />
-                        <TextBlock Text="Instale o driver virtual gratuito para que o Windows liste seu grupo (ex: Áudio dos Monitores) como saída."
-                                   FontSize="10.5" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,1,0,0" />
-                    </StackPanel>
-                    <Button Grid.Column="1" Style="{StaticResource PrimaryButton}" Height="28" Padding="12,0" FontSize="11"
-                            Content="Instalar Driver Virtual" Click="BtnBannerInstallDriver_Click" VerticalAlignment="Center" />
-                </Grid>
-            </Border>
-
-            <!-- 3. MASTER CONTROL CARD -->
-            <Border Grid.Row="2" Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderDarkBrush}"
-                    BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,14">
+            <!-- 2. MASTER CONTROL CARD -->
+            <Border Grid.Row="1" Background="{StaticResource BgCardBrush}" BorderBrush="{StaticResource BorderDarkBrush}"
+                    BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,12">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -140,7 +122,7 @@
                     </Grid>
 
                     <!-- Middle row: Master Action Button & Master Volume -->
-                    <Grid Grid.Row="1" Margin="0,4,0,4">
+                    <Grid Grid.Row="1" Margin="0,4,0,2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -185,324 +167,202 @@
                 </Grid>
             </Border>
 
-            <!-- 4. DESTINATION DEVICES & GROUPS (OUTPUTS) -->
-            <Grid Grid.Row="3" Margin="0,0,0,14">
+            <!-- 3. EQUALIZER CARD (DSP 10 BANDAS) -->
+            <Border Grid.Row="2" Background="#161922" BorderBrush="{StaticResource BorderDarkBrush}"
+                    BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" /> <!-- Header & Presets -->
+                        <RowDefinition Height="Auto" /> <!-- 10 Sliders -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Header Row: Title, Preset Dropdown, Reset, Enable Switch -->
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Title with Icon -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="26" Height="26" CornerRadius="6" Background="#2A2F40" Margin="0,0,8,0" VerticalAlignment="Center">
+                                <Path Fill="{StaticResource AccentSkyBrush}" Width="14" Height="14" Stretch="Uniform"
+                                      Data="M10 20h4V4h-4v16zm-6 0h4v-8H4v8zM16 9v11h4V9h-4z" />
+                            </Border>
+                            <TextBlock Text="EQUALIZADOR DSP" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- Presets Selector & Reset Button -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="Preset:" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <ComboBox x:Name="CmbEqPreset" Style="{StaticResource ModernComboBox}" Height="28" Width="150" FontSize="11"
+                                      DisplayMemberPath="Name" SelectionChanged="CmbEqPreset_SelectionChanged" />
+                            <Button Style="{StaticResource SubtleIconButton}" Height="28" Padding="8,0" Margin="6,0,0,0"
+                                    Click="BtnResetEq_Click" ToolTip="Resetar bandas para 0 dB (Flat)">
+                                <TextBlock Text="Resetar" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" />
+                            </Button>
+                        </StackPanel>
+
+                        <!-- EQ Active Toggle Switch -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Ativar" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <CheckBox x:Name="ChkEqEnable" Style="{StaticResource ModernToggleSwitch}"
+                                      IsChecked="{Binding IsEqualizerEnabled, Mode=TwoWay}"
+                                      Checked="ChkEqEnable_Changed" Unchecked="ChkEqEnable_Changed"
+                                      ToolTip="Ativar/Desativar equalizador de áudio em tempo real" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 10 Vertical Sliders Grid -->
+                    <ItemsControl Grid.Row="1" x:Name="ListEqBands" ItemsSource="{Binding EqualizerBands}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="1" Columns="10" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="2,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" /> <!-- dB Value -->
+                                        <RowDefinition Height="100" />  <!-- Vertical Slider -->
+                                        <RowDefinition Height="Auto" /> <!-- Frequency Label -->
+                                    </Grid.RowDefinitions>
+
+                                    <!-- dB Gain Value Text -->
+                                    <TextBlock Grid.Row="0" Text="{Binding GainDisplay}" FontSize="9.5" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,0,0,4" />
+
+                                    <!-- Vertical Slider -->
+                                    <Slider Grid.Row="1" Style="{StaticResource ModernVerticalSlider}"
+                                            Minimum="-12.0" Maximum="12.0" SmallChange="0.5" LargeChange="2.0"
+                                            Value="{Binding GainDb, Mode=TwoWay, Converter={StaticResource FloatToDouble}}"
+                                            ValueChanged="EqSlider_ValueChanged"
+                                            Tag="{Binding Index}" />
+
+                                    <!-- Frequency Label -->
+                                    <TextBlock Grid.Row="2" Text="{Binding Label}" FontSize="10" FontWeight="Bold"
+                                               Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+
+            <!-- 4. DESTINATION DEVICES (OUTPUTS) -->
+            <Grid Grid.Row="3" Margin="0,0,0,12">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <!-- Section Header with Group Creator & Refresh -->
+                <!-- Section Header with Refresh -->
                 <Grid Grid.Row="0" Margin="0,0,0,8">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="SAÍDAS DE ÁUDIO" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="DISPOSITIVOS DE DESTINO (ESPELHAMENTO)" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" />
                         <Border Background="#2A2F40" CornerRadius="8" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
                             <TextBlock x:Name="TxtActiveDestCount" Text="0 ativas" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource AccentSkyBrush}" />
                         </Border>
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <!-- Button "+ Unir Dispositivos" -->
-                        <Button Style="{StaticResource SubtleIconButton}" Click="BtnCreateGroup_Click" Margin="0,0,8,0"
-                                ToolTip="Criar um grupo para unir múltiplos alto-falantes ou monitores em um só">
-                            <StackPanel Orientation="Horizontal">
-                                <Path Fill="{StaticResource AccentSkyBrush}" Width="12" Height="12" Stretch="Uniform" Margin="0,0,4,0"
-                                      Data="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                                <TextBlock Text="Unir Dispositivos (Grupo)" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource AccentSkyBrush}" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Button Refresh -->
-                        <Button Style="{StaticResource SubtleIconButton}" ToolTip="Atualizar Dispositivos" Click="BtnRefreshDevices_Click">
-                            <StackPanel Orientation="Horizontal">
-                                <Path Fill="{StaticResource TextSecondaryBrush}" Width="12" Height="12" Stretch="Uniform" Margin="0,0,4,0"
-                                      Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
-                                <TextBlock Text="Atualizar" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
+                    <!-- Button Refresh -->
+                    <Button Style="{StaticResource SubtleIconButton}" HorizontalAlignment="Right" ToolTip="Atualizar Dispositivos" Click="BtnRefreshDevices_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Fill="{StaticResource TextSecondaryBrush}" Width="12" Height="12" Stretch="Uniform" Margin="0,0,4,0"
+                                  Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                            <TextBlock Text="Atualizar" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                        </StackPanel>
+                    </Button>
                 </Grid>
 
-                <!-- Scrollable Output List (Groups + Standalone Devices) -->
+                <!-- Scrollable Output List -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel>
+                    <ItemsControl x:Name="ListOutputDevices">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource BgCardBrush}"
+                                        BorderBrush="{StaticResource BorderDarkBrush}"
+                                        BorderThickness="1" CornerRadius="10"
+                                        Padding="14,12" Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
 
-                        <!-- A. GRUPOS UNIFICADOS -->
-                        <ItemsControl x:Name="ListGroupDevices">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Background="#161922"
-                                            BorderBrush="{StaticResource BorderDarkBrush}"
-                                            BorderThickness="1.5" CornerRadius="10"
-                                            Padding="14,12" Margin="0,0,0,10">
-                                        <Grid>
+                                        <!-- Device Icon Badge -->
+                                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Background="#2A2F40" Margin="0,0,12,0" VerticalAlignment="Center">
+                                            <Path Fill="{StaticResource TextSecondaryBrush}" Width="18" Height="18" Stretch="Uniform"
+                                                  Data="{Binding IconType, Converter={StaticResource DeviceIcon}}" />
+                                        </Border>
+
+                                        <!-- Device Info & Realtime VU Meter -->
+                                        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
                                             <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" /> <!-- Main Group Row -->
-                                                <RowDefinition Height="Auto" /> <!-- Windows Device Link Banner -->
-                                                <RowDefinition Height="Auto" /> <!-- Expanded Members Sub-panel -->
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
 
-                                            <!-- Row 0: Group Main Card -->
-                                            <Grid Grid.Row="0">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" /> <!-- Group Icon -->
-                                                    <ColumnDefinition Width="*" />    <!-- Name, Summary, VU -->
-                                                    <ColumnDefinition Width="Auto" /> <!-- Controls & Actions -->
-                                                </Grid.ColumnDefinitions>
-
-                                                <!-- Group Icon Badge -->
-                                                <Border Grid.Column="0" Width="38" Height="38" CornerRadius="8" Background="{StaticResource PrimaryGradientBrush}" Margin="0,0,12,0" VerticalAlignment="Center">
-                                                    <Path Fill="#FFFFFF" Width="18" Height="18" Stretch="Uniform"
-                                                          Data="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"
+                                                           TextTrimming="CharacterEllipsis" MaxWidth="250" />
+                                                <Border Visibility="{Binding IsSource, Converter={StaticResource BoolToVis}}"
+                                                        Background="#2A2F40" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="ORIGEM" FontSize="9" FontWeight="Bold" Foreground="{StaticResource AccentSkyBrush}" />
                                                 </Border>
-
-                                                <!-- Group Name, Summary & Realtime Group VU -->
-                                                <Grid Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                    </Grid.RowDefinitions>
-
-                                                    <StackPanel Grid.Row="0" Orientation="Horizontal">
-                                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="13.5" Foreground="{StaticResource TextPrimaryBrush}"
-                                                                   TextTrimming="CharacterEllipsis" MaxWidth="220" />
-                                                        <Border Background="#2A2F40" CornerRadius="4" Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center">
-                                                            <TextBlock Text="GRUPO UNIFICADO" FontSize="9" FontWeight="Bold" Foreground="{StaticResource AccentSkyBrush}" />
-                                                        </Border>
-                                                    </StackPanel>
-
-                                                    <TextBlock Grid.Row="1" Text="{Binding SummaryText}" FontSize="11" Foreground="{StaticResource TextMutedBrush}"
-                                                               TextTrimming="CharacterEllipsis" MaxWidth="260" Margin="0,2,0,4" />
-
-                                                    <!-- Group VU Meter Bar -->
-                                                    <Grid Grid.Row="2" Height="3.5">
-                                                        <Border Background="#2A2F40" CornerRadius="1.5" />
-                                                        <Border Height="3.5" CornerRadius="1.5" HorizontalAlignment="Left"
-                                                                Background="{StaticResource PrimaryGradientBrush}"
-                                                                Width="{Binding PeakLevel, Converter={StaticResource PeakToWidth}, ConverterParameter='200'}" />
-                                                    </Grid>
-                                                </Grid>
-
-                                                <!-- Group Controls (Volume Slider + Switch + Expand + Edit/Delete) -->
-                                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <!-- Group Volume Slider -->
-                                                    <StackPanel Orientation="Vertical" Width="90" Margin="0,0,10,0" VerticalAlignment="Center">
-                                                        <Grid Margin="0,0,0,1">
-                                                            <TextBlock Text="Vol. Grupo" FontSize="9.5" Foreground="{StaticResource TextMutedBrush}" />
-                                                            <TextBlock Text="{Binding Volume, Converter={StaticResource VolToPercent}}"
-                                                                       FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Right" />
-                                                        </Grid>
-                                                        <Slider Style="{StaticResource ModernSlider}"
-                                                                Minimum="0" Maximum="1.5" SmallChange="0.05" LargeChange="0.1"
-                                                                Value="{Binding Volume, Mode=TwoWay, Converter={StaticResource FloatToDouble}}"
-                                                                ValueChanged="GroupVolumeSlider_ValueChanged"
-                                                                Tag="{Binding Id}" />
-                                                    </StackPanel>
-
-                                                    <!-- Group Toggle Switch -->
-                                                    <CheckBox Style="{StaticResource ModernToggleSwitch}"
-                                                              IsChecked="{Binding IsEnabled, Mode=TwoWay}"
-                                                              Checked="GroupToggle_Changed"
-                                                              Unchecked="GroupToggle_Changed"
-                                                              Tag="{Binding Id}"
-                                                              ToolTip="Ligar/Desligar espelhamento para todo o grupo"
-                                                              Margin="0,0,8,0" />
-
-                                                    <!-- Expand / Collapse chevron -->
-                                                    <Button Style="{StaticResource SubtleIconButton}" Padding="4"
-                                                            Click="BtnToggleGroupExpand_Click" Tag="{Binding}"
-                                                            ToolTip="Ver/Ajustar balanço individual de cada dispositivo">
-                                                        <TextBlock Text="{Binding IsExpanded, Converter={StaticResource BoolToVis}, ConverterParameter='v'}"
-                                                                   FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}">
-                                                            <TextBlock.Style>
-                                                                <Style TargetType="TextBlock">
-                                                                    <Setter Property="Text" Value="▼" />
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding IsExpanded}" Value="True">
-                                                                            <Setter Property="Text" Value="▲" />
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </TextBlock.Style>
-                                                        </TextBlock>
-                                                    </Button>
-
-                                                    <!-- Edit Group -->
-                                                    <Button Style="{StaticResource SubtleIconButton}" Padding="4" Margin="2,0,0,0"
-                                                            Click="BtnEditGroup_Click" Tag="{Binding}" ToolTip="Editar Grupo">
-                                                        <Path Fill="{StaticResource TextSecondaryBrush}" Width="12" Height="12" Stretch="Uniform"
-                                                              Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                                                    </Button>
-
-                                                    <!-- Delete Group -->
-                                                    <Button Style="{StaticResource SubtleIconButton}" Padding="4" Margin="2,0,0,0"
-                                                            Click="BtnDeleteGroup_Click" Tag="{Binding Id}" ToolTip="Excluir Grupo">
-                                                        <Path Fill="{StaticResource AccentCoralBrush}" Width="12" Height="12" Stretch="Uniform"
-                                                              Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                                                    </Button>
-                                                </StackPanel>
-                                            </Grid>
-
-                                            <!-- Row 1: Windows Device Link Banner -->
-                                            <Border Grid.Row="1" Margin="0,8,0,0" Padding="8,5" Background="#11131A" CornerRadius="6"
-                                                    Visibility="{Binding IsWindowsDeviceLinked, Converter={StaticResource BoolToVis}}">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <Path Fill="{StaticResource AccentSkyBrush}" Width="11" Height="11" Stretch="Uniform" Margin="0,0,6,0"
-                                                              Data="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z" />
-                                                        <TextBlock Text="{Binding VirtualDeviceStatus}" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource AccentSkyBrush}" />
-                                                        <Border Visibility="{Binding IsWindowsDefault, Converter={StaticResource BoolToVis}}"
-                                                                Background="#059669" CornerRadius="3" Padding="5,1" Margin="8,0,0,0">
-                                                            <TextBlock Text="★ PADRÃO DO WINDOWS" FontSize="9" FontWeight="Bold" Foreground="#FFFFFF" />
-                                                        </Border>
-                                                    </StackPanel>
-
-                                                    <Button Grid.Column="1" Style="{StaticResource SubtleIconButton}" Padding="6,2"
-                                                            Click="BtnSetGroupDefault_Click" Tag="{Binding Id}"
-                                                            Visibility="{Binding IsWindowsDefault, Converter={StaticResource InvBoolToVis}}"
-                                                            ToolTip="Definir este dispositivo virtual como saída de áudio padrão do Windows">
-                                                        <TextBlock Text="★ Definir como Padrão do Windows" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource AccentSkyBrush}" />
-                                                    </Button>
-                                                </Grid>
-                                            </Border>
-
-                                            <!-- Row 2: Expanded Member Devices List -->
-                                            <Border Grid.Row="2" Margin="0,10,0,0" Padding="12,8" Background="#11131A" CornerRadius="8"
-                                                    Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
-                                                <StackPanel>
-                                                    <TextBlock Text="DISPOSITIVOS MEMBROS E BALANÇO INDIVIDUAL:" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6" />
-                                                    <ItemsControl ItemsSource="{Binding Members}">
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <Grid Margin="0,3,0,3">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="Auto" />
-                                                                        <ColumnDefinition Width="*" />
-                                                                        <ColumnDefinition Width="Auto" />
-                                                                    </Grid.ColumnDefinitions>
-
-                                                                    <Path Grid.Column="0" Fill="{StaticResource TextMutedBrush}" Width="12" Height="12" Stretch="Uniform" Margin="0,0,8,0"
-                                                                          Data="{Binding IconType, Converter={StaticResource DeviceIcon}}" VerticalAlignment="Center" />
-
-                                                                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="11.5" Foreground="{StaticResource TextSecondaryBrush}"
-                                                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-
-                                                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                                                        <TextBlock Text="{Binding Volume, Converter={StaticResource VolToPercent}}"
-                                                                                   FontSize="10" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,6,0" VerticalAlignment="Center" />
-                                                                        <Slider Style="{StaticResource ModernSlider}" Width="80" Height="18"
-                                                                                Minimum="0" Maximum="1.5" SmallChange="0.05" LargeChange="0.1"
-                                                                                Value="{Binding Volume, Mode=TwoWay, Converter={StaticResource FloatToDouble}}"
-                                                                                ValueChanged="DeviceVolumeSlider_ValueChanged"
-                                                                                Tag="{Binding Id}" />
-                                                                    </StackPanel>
-                                                                </Grid>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                </StackPanel>
-                                            </Border>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <!-- B. DISPOSITIVOS INDIVIDUAIS -->
-                        <TextBlock Text="DISPOSITIVOS INDIVIDUAIS" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,8" />
-
-                        <ItemsControl x:Name="ListOutputDevices">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Background="{StaticResource BgCardBrush}"
-                                            BorderBrush="{StaticResource BorderDarkBrush}"
-                                            BorderThickness="1" CornerRadius="10"
-                                            Padding="14,12" Margin="0,0,0,8">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- Device Icon Badge -->
-                                            <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Background="#2A2F40" Margin="0,0,12,0" VerticalAlignment="Center">
-                                                <Path Fill="{StaticResource TextSecondaryBrush}" Width="18" Height="18" Stretch="Uniform"
-                                                      Data="{Binding IconType, Converter={StaticResource DeviceIcon}}" />
-                                            </Border>
-
-                                            <!-- Device Info & Realtime VU Meter -->
-                                            <Grid Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto" />
-                                                    <RowDefinition Height="Auto" />
-                                                    <RowDefinition Height="Auto" />
-                                                </Grid.RowDefinitions>
-
-                                                <StackPanel Grid.Row="0" Orientation="Horizontal">
-                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"
-                                                               TextTrimming="CharacterEllipsis" MaxWidth="240" />
-                                                    <Border Visibility="{Binding IsSource, Converter={StaticResource BoolToVis}}"
-                                                            Background="#2A2F40" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                                        <TextBlock Text="ORIGEM" FontSize="9" FontWeight="Bold" Foreground="{StaticResource AccentSkyBrush}" />
-                                                    </Border>
-                                                    <Border Visibility="{Binding IsDefault, Converter={StaticResource BoolToVis}}"
-                                                            Background="#2A2F40" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                                        <TextBlock Text="PADRÃO" FontSize="9" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" />
-                                                    </Border>
-                                                </StackPanel>
-
-                                                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,2,0,4">
-                                                    <TextBlock Text="{Binding FormatDescription}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
-                                                    <TextBlock Text=" • " FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
-                                                    <TextBlock Text="{Binding StatusText}" FontSize="11" FontWeight="SemiBold"
-                                                               Foreground="{Binding StatusText, Converter={StaticResource StatusBrush}}" />
-                                                </StackPanel>
-
-                                                <Grid Grid.Row="2" Height="3" Visibility="{Binding CanBeMirrored, Converter={StaticResource BoolToVis}}">
-                                                    <Border Background="#2A2F40" CornerRadius="1.5" />
-                                                    <Border Height="3" CornerRadius="1.5" HorizontalAlignment="Left"
-                                                            Background="{StaticResource PrimaryGradientBrush}"
-                                                            Width="{Binding PeakLevel, Converter={StaticResource PeakToWidth}, ConverterParameter='200'}" />
-                                                </Grid>
-                                            </Grid>
-
-                                            <!-- Controls: Volume Slider + Toggle Switch -->
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
-                                                        Visibility="{Binding CanBeMirrored, Converter={StaticResource BoolToVis}}">
-                                                <StackPanel Orientation="Vertical" Width="100" Margin="0,0,14,0" VerticalAlignment="Center">
-                                                    <Grid Margin="0,0,0,1">
-                                                        <TextBlock Text="Ganho" FontSize="10" Foreground="{StaticResource TextMutedBrush}" />
-                                                        <TextBlock Text="{Binding Volume, Converter={StaticResource VolToPercent}}"
-                                                                   FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Right" />
-                                                    </Grid>
-                                                    <Slider Style="{StaticResource ModernSlider}"
-                                                            Minimum="0" Maximum="1.5" SmallChange="0.05" LargeChange="0.1"
-                                                            Value="{Binding Volume, Mode=TwoWay, Converter={StaticResource FloatToDouble}}"
-                                                            ValueChanged="DeviceVolumeSlider_ValueChanged"
-                                                            Tag="{Binding Id}" />
-                                                </StackPanel>
-
-                                                <CheckBox Style="{StaticResource ModernToggleSwitch}"
-                                                          IsChecked="{Binding IsMirrorEnabled, Mode=TwoWay}"
-                                                          Checked="DeviceToggle_Changed"
-                                                          Unchecked="DeviceToggle_Changed"
-                                                          Tag="{Binding Id}"
-                                                          ToolTip="Habilitar/Desabilitar espelhamento individual para este dispositivo" />
+                                                <Border Visibility="{Binding IsDefault, Converter={StaticResource BoolToVis}}"
+                                                        Background="#2A2F40" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="PADRÃO" FontSize="9" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" />
+                                                </Border>
                                             </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
 
-                    </StackPanel>
+                                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,2,0,4">
+                                                <TextBlock Text="{Binding FormatDescription}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                                <TextBlock Text=" • " FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                                <TextBlock Text="{Binding StatusText}" FontSize="11" FontWeight="SemiBold"
+                                                           Foreground="{Binding StatusText, Converter={StaticResource StatusBrush}}" />
+                                            </StackPanel>
+
+                                            <Grid Grid.Row="2" Height="3" Visibility="{Binding CanBeMirrored, Converter={StaticResource BoolToVis}}">
+                                                <Border Background="#2A2F40" CornerRadius="1.5" />
+                                                <Border Height="3" CornerRadius="1.5" HorizontalAlignment="Left"
+                                                        Background="{StaticResource PrimaryGradientBrush}"
+                                                        Width="{Binding PeakLevel, Converter={StaticResource PeakToWidth}, ConverterParameter='200'}" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <!-- Controls: Volume Slider + Toggle Switch -->
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
+                                                    Visibility="{Binding CanBeMirrored, Converter={StaticResource BoolToVis}}">
+                                            <StackPanel Orientation="Vertical" Width="100" Margin="0,0,14,0" VerticalAlignment="Center">
+                                                <Grid Margin="0,0,0,1">
+                                                    <TextBlock Text="Ganho" FontSize="10" Foreground="{StaticResource TextMutedBrush}" />
+                                                    <TextBlock Text="{Binding Volume, Converter={StaticResource VolToPercent}}"
+                                                               FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Right" />
+                                                </Grid>
+                                                <Slider Style="{StaticResource ModernSlider}"
+                                                        Minimum="0" Maximum="1.5" SmallChange="0.05" LargeChange="0.1"
+                                                        Value="{Binding Volume, Mode=TwoWay, Converter={StaticResource FloatToDouble}}"
+                                                        ValueChanged="DeviceVolumeSlider_ValueChanged"
+                                                        Tag="{Binding Id}" />
+                                            </StackPanel>
+
+                                            <CheckBox Style="{StaticResource ModernToggleSwitch}"
+                                                      IsChecked="{Binding IsMirrorEnabled, Mode=TwoWay}"
+                                                      Checked="DeviceToggle_Changed"
+                                                      Unchecked="DeviceToggle_Changed"
+                                                      Tag="{Binding Id}"
+                                                      ToolTip="Habilitar/Desabilitar espelhamento para este dispositivo" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </ScrollViewer>
             </Grid>
 

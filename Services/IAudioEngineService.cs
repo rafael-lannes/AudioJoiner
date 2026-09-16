@@ -6,14 +6,16 @@ namespace AudioJoiner.Services;
 public interface IAudioEngineService : IDisposable
 {
     ObservableCollection<AudioDeviceInfo> Devices { get; }
-    ObservableCollection<AudioGroupInfo> Groups { get; }
     AudioDeviceInfo? SelectedSourceDevice { get; set; }
     bool IsRunning { get; }
     float MasterVolume { get; set; }
     int LatencyMs { get; set; }
     float MasterPeakLevel { get; }
 
-    VirtualDeviceService VirtualService { get; }
+    ObservableCollection<EqualizerBand> EqualizerBands { get; }
+    List<EqualizerPreset> EqualizerPresets { get; }
+    bool IsEqualizerEnabled { get; set; }
+    EqualizerPreset? SelectedEqualizerPreset { get; set; }
 
     event Action? StateChanged;
     event Action<string>? DeviceStatusChanged;
@@ -25,10 +27,7 @@ public interface IAudioEngineService : IDisposable
     void SetDeviceMirrorState(string deviceId, bool isEnabled);
     void SetDeviceVolume(string deviceId, float volume);
 
-    void CreateOrUpdateGroup(string? id, string name, List<string> deviceIds, float volume = 1.0f, string? virtualDeviceId = null, string? virtualDeviceName = null);
-    void DeleteGroup(string groupId);
-    void SetGroupState(string groupId, bool isEnabled);
-    void SetGroupVolume(string groupId, float volume);
-    void SetGroupMemberVolume(string groupId, string deviceId, float volume);
-    bool SetGroupAsDefaultWindowsDevice(string groupId);
+    void SetEqualizerBandGain(int bandIndex, float gainDb);
+    void ApplyEqualizerPreset(EqualizerPreset preset);
+    void ResetEqualizer();
 }

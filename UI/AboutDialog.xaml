@@ -52,7 +52,7 @@
                     <TextBlock Text="Audio" FontWeight="Bold" FontSize="18" Foreground="{StaticResource TextPrimaryBrush}" />
                     <TextBlock Text="Joiner" FontWeight="Bold" FontSize="18" Foreground="{StaticResource AccentSkyBrush}" />
                     <Border Background="#2A2F40" CornerRadius="4" Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="v1.2" FontSize="10" FontWeight="Bold" Foreground="{StaticResource AccentSkyBrush}" />
+                        <TextBlock Text="v1.3" FontSize="10" FontWeight="Bold" Foreground="{StaticResource AccentSkyBrush}" />
                     </Border>
                 </StackPanel>
                 <TextBlock Text="Multi-Output Audio Cloner &amp; Splitter" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,2,0,0" />

@@ -29,7 +29,7 @@
     <SolidColorBrush x:Key="AccentCoralBrush" Color="{StaticResource AccentCoralColor}" />
 
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryBrush}" />
     <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMutedColor}" />
 
     <!-- Modern Linear Gradient Accent -->
@@ -92,7 +92,7 @@
         </Setter>
     </Style>
 
-    <!-- Modern Slider Style -->
+    <!-- Modern Horizontal Slider Style -->
     <Style x:Key="ModernSlider" TargetType="{x:Type Slider}">
         <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false" />
         <Setter Property="Background" Value="Transparent" />
@@ -107,6 +107,62 @@
                                 <Border x:Name="PART_SelectionRange" Height="6" CornerRadius="3" Background="{StaticResource PrimaryGradientBrush}" HorizontalAlignment="Left" />
                             </Grid>
                         </Border>
+                        <Track x:Name="PART_Track">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="{x:Static Slider.DecreaseLarge}">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate>
+                                            <Border Background="Transparent" />
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Width="16" Height="16" Cursor="Hand">
+                                    <Thumb.Template>
+                                        <ControlTemplate>
+                                            <Grid>
+                                                <Ellipse Fill="#0EA5E9" Width="16" Height="16">
+                                                    <Ellipse.Effect>
+                                                        <DropShadowEffect BlurRadius="6" Color="#0EA5E9" Opacity="0.6" ShadowDepth="0" />
+                                                    </Ellipse.Effect>
+                                                </Ellipse>
+                                                <Ellipse Fill="#FFFFFF" Width="6" Height="6" />
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="{x:Static Slider.IncreaseLarge}">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate>
+                                            <Border Background="Transparent" />
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Modern Vertical Slider Style (For Equalizer) -->
+    <Style x:Key="ModernVerticalSlider" TargetType="{x:Type Slider}">
+        <Setter Property="Orientation" Value="Vertical" />
+        <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource AccentSkyBrush}" />
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Slider}">
+                    <Grid HorizontalAlignment="Center">
+                        <Border Width="6" CornerRadius="3" Background="#2A2F40" HorizontalAlignment="Center" />
+                        <!-- 0dB Middle Mark -->
+                        <Border Width="12" Height="1.5" Background="#475569" VerticalAlignment="Center" HorizontalAlignment="Center" />
                         <Track x:Name="PART_Track">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Command="{x:Static Slider.DecreaseLarge}">
