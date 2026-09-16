@@ -1,32 +1,11 @@
-## Visual Studio / .NET
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-[Ll]ogs/
-.vs/
+﻿bin/
+obj/
 *.user
-*.userosscache
-*.sln.docstates
 *.suo
-*.pdb
-
-# Build results
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-build/
-publish/
-
-# Visual Studio Code
+.vs/
+.idea/
 .vscode/
-*.code-workspace
-
-# OS files
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Temporary files
-*.tmp
-*.temp
+dist/*.dll
+dist/*.exe
+dist/*.json
+dist/*.pdb
